@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#ff8fab">
+<title>Animal World</title>
+<link rel="manifest" href="manifest.json">
+<style>
+* {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; -webkit-user-select: none;
+  touch-action: none;
+}
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #fef9ff;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+}
+#app {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Background ── */
+#bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, #fff0f8 0%, #f0f8ff 50%, #f5fff0 100%);
+  z-index: 0; overflow: hidden;
+  pointer-events: none;
+}
+.bg-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.18;
+  animation: bgFloat linear infinite;
+}
+@keyframes bgFloat {
+  0%   { transform: translateY(0) rotate(0deg); }
+  50%  { transform: translateY(-30px) rotate(180deg); }
+  100% { transform: translateY(0) rotate(360deg); }
+}
+
+/* ── Screens ── */
+#screens {
+  position: relative; flex: 1;
+  z-index: 1; overflow: hidden;
+}
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: transform 0.4s cubic-bezier(.4,0,.2,1), opacity 0.4s;
+  will-change: transform, opacity;
+}
+.screen.left  { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+.screen.right { transform: translateX(100%);  opacity: 0; pointer-events: none; }
+.screen.active{ transform: translateX(0);     opacity: 1; pointer-events: all; }
+
+/* ── Nav ── */
+#nav {
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  gap: 18px; padding: 10px 0 max(10px, env(safe-area-inset-bottom));
+  background: rgba(255,255,255,0.7); backdrop-filter: blur(8px);
+}
+.nav-arrow {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: none; cursor: pointer;
+  background: linear-gradient(135deg, #ffb3c6, #ff8fab);
+  font-size: 22px; box-shadow: 0 3px 10px rgba(255,100,150,0.35);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.15s;
+}
+.nav-arrow:active { transform: scale(0.88); }
+.dots { display: flex; gap: 10px; }
+.dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #ddd; transition: all 0.3s;
+}
+.dot.active { background: #ff8fab; transform: scale(1.4); }
+
+/* ── Mute button (parent-only: long press 2s) ── */
+#mute-btn {
+  position: fixed; top: max(8px, env(safe-area-inset-top)); right: 8px;
+  z-index: 999;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0,0,0,0.12); border: none; cursor: pointer;
+  font-size: 14px; display: flex; align-items: center; justify-content: center;
+  color: rgba(0,0,0,0.4);
+}
+
+/* ═══════════════════════════════════════════
+   SCREEN 1 — ANIMAL POP
+═══════════════════════════════════════════ */
+#screen-animals {
+  background: transparent;
+}
+#animal-stage {
+  position: relative;
+  width: 100%; flex: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.animal-card {
+  position: absolute;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  border-radius: 40px;
+  padding: 20px 30px;
+  background: rgba(255,255,255,0.85);
+  box-shadow: 0 8px 32px rgba(100,100,200,0.15);
+  transition: opacity 0.5s, transform 0.5s;
+  will-change: transform;
+  animation: animalEntrance 0.5s cubic-bezier(.34,1.56,.64,1);
+}
+.animal-card .emoji {
+  font-size: clamp(100px, 28vw, 160px);
+  line-height: 1;
+  display: block;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.12));
+}
+.animal-card .label {
+  font-size: clamp(24px, 6vw, 38px);
+  font-weight: 800;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #ff6b9d, #a78bfa);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+@keyframes animalEntrance {
+  from { transform: scale(0.3) rotate(-15deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes animalBounce {
+  0%   { transform: scale(1) rotate(0deg); }
+  20%  { transform: scale(1.3) rotate(-8deg); }
+  40%  { transform: scale(0.9) rotate(6deg); }
+  60%  { transform: scale(1.15) rotate(-4deg); }
+  80%  { transform: scale(0.97) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.animal-card.bounce { animation: animalBounce 0.6s cubic-bezier(.34,1.56,.64,1); }
+
+/* ═══════════════════════════════════════════
+   SCREEN 2 — COLOR BUBBLES
+═══════════════════════════════════════════ */
+#screen-bubbles {
+  overflow: hidden;
+}
+#bubble-stage {
+  position: relative; width: 100%; flex: 1; overflow: hidden;
+}
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: inset -8px -8px 20px rgba(0,0,0,0.12), 0 4px 20px rgba(0,0,0,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0px;
+  will-change: transform;
+  animation: bubbleFloat ease-in-out infinite alternate;
+  transition: transform 0.1s;
+}
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: 18%; left: 22%;
+  width: 30%; height: 20%;
+  background: rgba(255,255,255,0.55);
+  border-radius: 50%;
+  transform: rotate(-35deg);
+}
+@keyframes bubbleFloat {
+  from { transform: translateY(0px) rotate(-3deg); }
+  to   { transform: translateY(-22px) rotate(3deg); }
+}
+@keyframes bubblePop {
+  0%   { transform: scale(1); opacity: 1; }
+  40%  { transform: scale(1.5); opacity: 0.8; }
+  70%  { transform: scale(1.8); opacity: 0.3; }
+  100% { transform: scale(0.1); opacity: 0; }
+}
+.bubble.popping { animation: bubblePop 0.35s ease-out forwards; }
+
+/* ═══════════════════════════════════════════
+   SCREEN 3 — MUSIC TAP
+═══════════════════════════════════════════ */
+#screen-music {
+  padding: 10px;
+}
+#music-title {
+  font-size: clamp(18px, 5vw, 28px);
+  font-weight: 800;
+  color: #a78bfa;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 8px rgba(167,139,250,0.3);
+}
+#shapes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: clamp(10px, 3vw, 20px);
+  width: 100%;
+  max-width: 400px;
+  padding: 0 10px;
+  flex: 1;
+  align-content: center;
+}
+.shape-btn {
+  aspect-ratio: 1;
+  border: none; cursor: pointer;
+  border-radius: 28px;
+  background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.15s;
+  will-change: transform;
+  padding: 0;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.18));
+}
+.shape-btn:active { transform: scale(0.88); }
+@keyframes shapeWiggle {
+  0%   { transform: scale(1) rotate(0); }
+  20%  { transform: scale(1.25) rotate(-10deg); }
+  50%  { transform: scale(1.15) rotate(8deg); }
+  75%  { transform: scale(1.05) rotate(-4deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+.shape-btn.wiggle { animation: shapeWiggle 0.5s cubic-bezier(.34,1.56,.64,1); }
+
+#magic-toggle {
+  margin-top: 12px;
+  padding: 12px 28px;
+  border: none; border-radius: 50px;
+  background: linear-gradient(135deg, #a78bfa, #f472b6);
+  color: white; font-size: clamp(16px, 4.5vw, 22px);
+  font-weight: 800; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(167,139,250,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+#magic-toggle:active { transform: scale(0.93); }
+#magic-toggle.on {
+  background: linear-gradient(135deg, #f472b6, #fb923c);
+  box-shadow: 0 4px 20px rgba(244,114,182,0.5);
+}
+
+/* ── Particles ── */
+.particle {
+  position: fixed;
+  pointer-events: none;
+  border-radius: 50%;
+  z-index: 500;
+  animation: particleFly 0.8s ease-out forwards;
+  will-change: transform, opacity;
+}
+@keyframes particleFly {
+  0%   { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+}
+.star-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 500;
+  font-size: 22px;
+  animation: starFly 0.9s ease-out forwards;
+  will-change: transform, opacity;
+}
+@keyframes starFly {
+  0%   { transform: translate(0,0) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0) rotate(360deg); opacity: 0; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="bg"></div>
+
+  <button id="mute-btn" title="Long press to mute">🔊</button>
+
+  <div id="screens">
+    <!-- Screen 1: Animal Pop -->
+    <div class="screen active" id="screen-animals">
+      <div id="animal-stage"></div>
+    </div>
+
+    <!-- Screen 2: Color Bubbles -->
+    <div class="screen right" id="screen-bubbles">
+      <div id="bubble-stage"></div>
+    </div>
+
+    <!-- Screen 3: Music Tap -->
+    <div class="screen right" id="screen-music">
+      <div id="music-title">🎵 Tap to Play!</div>
+      <div id="shapes-grid"></div>
+      <button id="magic-toggle">✨ Magic Mode</button>
+    </div>
+  </div>
+
+  <nav id="nav">
+    <button class="nav-arrow" id="prev-btn">◀</button>
+    <div class="dots">
+      <div class="dot active" data-i="0"></div>
+      <div class="dot" data-i="1"></div>
+      <div class="dot" data-i="2"></div>
+    </div>
+    <button class="nav-arrow" id="next-btn">▶</button>
+  </nav>
+</div>
+
+<script>
+'use strict';
+// ─────────────────────────────────────────────
+// AUDIO ENGINE
+// ─────────────────────────────────────────────
+let audioCtx = null;
+let muted = false;
+
+async function getAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return null; }
+  }
+  if (audioCtx.state === 'suspended') {
+    try { await audioCtx.resume(); } catch(e) {}
+  }
+  return audioCtx;
+}
+
+async function playTone(freq, type='sine', dur=0.4, vol=0.7, delay=0) {
+  if (muted) return;
+  const ac = await getAudio(); if (!ac || ac.state !== 'running') return;
+  const osc = ac.createOscillator();
+  const gain = ac.createGain();
+  osc.connect(gain); gain.connect(ac.destination);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, ac.currentTime + delay);
+  osc.frequency.exponentialRampToValueAtTime(freq * 0.8, ac.currentTime + delay + dur);
+  gain.gain.setValueAtTime(0, ac.currentTime + delay);
+  gain.gain.linearRampToValueAtTime(vol, ac.currentTime + delay + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + delay + dur);
+  osc.start(ac.currentTime + delay);
+  osc.stop(ac.currentTime + delay + dur + 0.05);
+}
+
+function playChime(baseFreq) {
+  if (muted) return;
+  playTone(baseFreq, 'sine', 0.5, 0.7, 0);
+  playTone(baseFreq * 1.5, 'sine', 0.4, 0.5, 0.06);
+  playTone(baseFreq * 2, 'sine', 0.35, 0.35, 0.12);
+}
+
+async function playPop() {
+  if (muted) return;
+  const ac = await getAudio(); if (!ac || ac.state !== 'running') return;
+  const osc = ac.createOscillator();
+  const gain = ac.createGain();
+  osc.connect(gain); gain.connect(ac.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(900, ac.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(200, ac.currentTime + 0.18);
+  gain.gain.setValueAtTime(0.8, ac.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.22);
+  osc.start(ac.currentTime);
+  osc.stop(ac.currentTime + 0.25);
+}
+
+function playAnimalSound(name) {
+  if (muted) return;
+  const sounds = {
+    cat:       () => { playTone(700,'sine',0.25,0.7); playTone(620,'sine',0.25,0.7,0.3); },
+    dog:       () => { playTone(200,'sawtooth',0.18,0.8); playTone(160,'sawtooth',0.18,0.8,0.2); playTone(200,'sawtooth',0.18,0.8,0.4); },
+    duck:      () => { playTone(500,'square',0.15,0.7); playTone(420,'square',0.15,0.7,0.18); playTone(500,'square',0.15,0.7,0.36); },
+    cow:       () => { playTone(120,'sawtooth',0.6,0.8); playTone(100,'sawtooth',0.4,0.7,0.4); },
+    fish:      () => { playChime(523); },
+    butterfly: () => { [523,659,784,1047].forEach((f,i)=>playTone(f,'sine',0.25,0.6,i*0.12)); },
+    bunny:     () => { playTone(800,'sine',0.15,0.6); playTone(1000,'sine',0.15,0.5,0.2); },
+    elephant:  () => { playTone(80,'sawtooth',0.7,0.9); playTone(70,'sawtooth',0.5,0.8,0.5); },
+    lion:      () => { playTone(100,'sawtooth',0.8,0.9); playTone(80,'sawtooth',0.6,0.8,0.3); playTone(60,'sawtooth',0.5,0.7,0.6); },
+    frog:      () => { playTone(300,'square',0.15,0.7); playTone(240,'square',0.15,0.7,0.2); },
+  };
+  (sounds[name] || sounds.fish)();
+}
+
+// Musical notes for music tap
+const NOTES = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; // C D E G A C5
+
+// ─────────────────────────────────────────────
+// SPEECH
+// ─────────────────────────────────────────────
+function speak(text) {
+  if (muted || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.85; u.pitch = 1.3; u.volume = 1;
+  // prefer a friendly voice
+  const voices = speechSynthesis.getVoices();
+  const pick = voices.find(v => v.lang.startsWith('en') && /female|zira|samantha|karen|moira/i.test(v.name))
+            || voices.find(v => v.lang.startsWith('en'));
+  if (pick) u.voice = pick;
+  speechSynthesis.speak(u);
+}
+// Preload voices
+if (window.speechSynthesis) {
+  speechSynthesis.getVoices();
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
+
+// ─────────────────────────────────────────────
+// PARTICLES
+// ─────────────────────────────────────────────
+const COLORS = ['#ff6b9d','#a78bfa','#34d399','#fbbf24','#60a5fa','#fb923c','#f472b6','#4ade80'];
+
+function spawnParticles(x, y, count=12) {
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'particle';
+    const size = 8 + Math.random() * 14;
+    const angle = (Math.PI * 2 * i / count) + (Math.random() - 0.5) * 0.5;
+    const dist = 60 + Math.random() * 80;
+    el.style.cssText = `
+      left:${x}px; top:${y}px;
+      width:${size}px; height:${size}px;
+      background:${COLORS[Math.floor(Math.random()*COLORS.length)]};
+      --dx:${Math.cos(angle)*dist}px;
+      --dy:${Math.sin(angle)*dist}px;
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  }
+}
+
+function spawnStars(x, y, count=8) {
+  const emojis = ['⭐','✨','💫','🌟','❤️','🎵','🌈','💖'];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'star-particle';
+    const angle = (Math.PI * 2 * i / count) + Math.random() * 0.8;
+    const dist = 50 + Math.random() * 90;
+    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.cssText = `
+      left:${x - 11}px; top:${y - 11}px;
+      --dx:${Math.cos(angle)*dist}px;
+      --dy:${Math.sin(angle)*dist}px;
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+  }
+}
+
+// ─────────────────────────────────────────────
+// BACKGROUND DECORATION
+// ─────────────────────────────────────────────
+(function initBg() {
+  const bg = document.getElementById('bg');
+  const shapes = ['💜','💛','💙','🌸','💚','🌙','⭐','💖'];
+  for (let i = 0; i < 12; i++) {
+    const el = document.createElement('div');
+    el.className = 'bg-shape';
+    const size = 30 + Math.random() * 50;
+    el.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      background: ${COLORS[i % COLORS.length]};
+      animation-duration: ${4 + Math.random() * 6}s;
+      animation-delay: ${-Math.random() * 6}s;
+      transform: scale(${0.5 + Math.random()});
+    `;
+    bg.appendChild(el);
+  }
+})();
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+const screens = ['screen-animals','screen-bubbles','screen-music'];
+let currentScreen = 0;
+let isAnimating = false;
+
+function goTo(idx) {
+  if (isAnimating || idx === currentScreen) return;
+  isAnimating = true;
+  const dir = idx > currentScreen ? 1 : -1;
+  const from = document.getElementById(screens[currentScreen]);
+  const to   = document.getElementById(screens[idx]);
+
+  to.classList.remove('left','right','active');
+  to.classList.add(dir > 0 ? 'right' : 'left');
+  to.getBoundingClientRect(); // force reflow
+
+  from.classList.add(dir > 0 ? 'left' : 'right');
+  from.classList.remove('active');
+  to.classList.remove('left','right');
+  to.classList.add('active');
+
+  document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active', i === idx));
+  currentScreen = idx;
+
+  if (idx === 1) initBubbles();
+  if (idx === 2) initMusic();
+
+  setTimeout(() => { isAnimating = false; }, 450);
+}
+
+document.getElementById('prev-btn').addEventListener('pointerdown', e => { e.preventDefault(); goTo(Math.max(0, currentScreen-1)); });
+document.getElementById('next-btn').addEventListener('pointerdown', e => { e.preventDefault(); goTo(Math.min(screens.length-1, currentScreen+1)); });
+
+// Swipe detection
+let swipeStartX = 0, swipeStartY = 0;
+document.getElementById('screens').addEventListener('pointerdown', e => {
+  swipeStartX = e.clientX; swipeStartY = e.clientY;
+}, { passive: true });
+document.getElementById('screens').addEventListener('pointerup', e => {
+  const dx = e.clientX - swipeStartX;
+  const dy = e.clientY - swipeStartY;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? Math.min(2, currentScreen+1) : Math.max(0, currentScreen-1));
+  }
+}, { passive: true });
+
+// ─────────────────────────────────────────────
+// MUTE (long press 2s)
+// ─────────────────────────────────────────────
+let muteTimer = null;
+const muteBtn = document.getElementById('mute-btn');
+muteBtn.addEventListener('pointerdown', () => {
+  muteTimer = setTimeout(() => {
+    muted = !muted;
+    muteBtn.textContent = muted ? '🔇' : '🔊';
+    if (!muted) getAudio(); // resume
+  }, 2000);
+});
+muteBtn.addEventListener('pointerup', () => clearTimeout(muteTimer));
+muteBtn.addEventListener('pointerleave', () => clearTimeout(muteTimer));
+
+// ─────────────────────────────────────────────
+// SCREEN 1: ANIMAL POP
+// ─────────────────────────────────────────────
+const animals = [
+  { name: 'cat',       emoji: '🐱', color: '#ffe0ef', label: 'Cat' },
+  { name: 'dog',       emoji: '🐶', color: '#e0f0ff', label: 'Dog' },
+  { name: 'duck',      emoji: '🐥', color: '#fffbe0', label: 'Duck' },
+  { name: 'cow',       emoji: '🐮', color: '#e8ffe0', label: 'Cow' },
+  { name: 'fish',      emoji: '🐠', color: '#e0f8ff', label: 'Fish' },
+  { name: 'butterfly', emoji: '🦋', color: '#f0e0ff', label: 'Butterfly' },
+  { name: 'bunny',     emoji: '🐰', color: '#ffe8f0', label: 'Bunny' },
+  { name: 'elephant',  emoji: '🐘', color: '#e8eaff', label: 'Elephant' },
+  { name: 'lion',      emoji: '🦁', color: '#fff4e0', label: 'Lion' },
+  { name: 'frog',      emoji: '🐸', color: '#e0ffe8', label: 'Frog' },
+];
+
+let currentAnimal = null;
+let animalLocked = false;
+let animalTimeout = null;
+
+function showAnimal(idx) {
+  const stage = document.getElementById('animal-stage');
+  const data = animals[idx];
+
+  // Remove old card
+  const old = stage.querySelector('.animal-card');
+  if (old) {
+    old.style.opacity = '0';
+    old.style.transform = 'scale(0.5) rotate(10deg)';
+    setTimeout(() => old.remove(), 400);
+  }
+
+  setTimeout(() => {
+    const card = document.createElement('div');
+    card.className = 'animal-card';
+    card.style.background = data.color;
+    card.innerHTML = `<span class="emoji">${data.emoji}</span><span class="label">${data.label}</span>`;
+    card.dataset.name = data.name;
+    card.dataset.label = data.label;
+
+    card.addEventListener('pointerdown', onAnimalTap, { passive: false });
+    stage.appendChild(card);
+    currentAnimal = card;
+  }, old ? 350 : 0);
+}
+
+function onAnimalTap(e) {
+  e.preventDefault();
+  if (animalLocked) return;
+  animalLocked = true;
+  clearTimeout(animalTimeout);
+
+  const card = e.currentTarget;
+  const rect = card.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+
+  card.classList.remove('bounce');
+  void card.offsetWidth;
+  card.classList.add('bounce');
+
+  spawnParticles(cx, cy, 14);
+  spawnStars(cx, cy, 8);
+  playAnimalSound(card.dataset.name);
+  speak(card.dataset.label);
+
+  animalTimeout = setTimeout(() => {
+    card.classList.remove('bounce');
+    animalLocked = false;
+    nextAnimal();
+  }, 2000);
+}
+
+let animalIndex = 0;
+function nextAnimal() {
+  let next;
+  do { next = Math.floor(Math.random() * animals.length); } while (next === animalIndex);
+  animalIndex = next;
+  showAnimal(animalIndex);
+}
+
+// Init animal screen
+showAnimal(0);
+// Auto-cycle if no interaction after 5s
+function scheduleAnimalCycle() {
+  clearTimeout(animalTimeout);
+  animalTimeout = setTimeout(() => { if (!animalLocked) nextAnimal(); scheduleAnimalCycle(); }, 5000);
+}
+scheduleAnimalCycle();
+
+// ─────────────────────────────────────────────
+// SCREEN 2: COLOR BUBBLES
+// ─────────────────────────────────────────────
+const bubbleData = [
+  { color: '#ff6b6b', label: 'Red',    base: '#ff8fab' },
+  { color: '#74b9ff', label: 'Blue',   base: '#60a5fa' },
+  { color: '#fdcb6e', label: 'Yellow', base: '#fbbf24' },
+  { color: '#55efc4', label: 'Green',  base: '#34d399' },
+  { color: '#a29bfe', label: 'Purple', base: '#a78bfa' },
+  { color: '#fd79a8', label: 'Pink',   base: '#f472b6' },
+  { color: '#ff9f43', label: 'Orange', base: '#fb923c' },
+];
+
+let bubblesActive = false;
+let bubbleAnimFrame = null;
+const activeBubbles = new Set();
+
+function initBubbles() {
+  if (bubblesActive) return;
+  bubblesActive = true;
+  const stage = document.getElementById('bubble-stage');
+  for (let i = 0; i < 5; i++) spawnBubble(stage, i * 400);
+}
+
+function spawnBubble(stage, delay = 0) {
+  setTimeout(() => {
+    if (!bubblesActive) return;
+    const data = bubbleData[Math.floor(Math.random() * bubbleData.length)];
+    const radius = 80 + Math.random() * 60;
+    const stageW = stage.offsetWidth  || window.innerWidth;
+    const stageH = stage.offsetHeight || window.innerHeight * 0.75;
+    const x = radius + Math.random() * (stageW - radius * 2);
+    const y = radius + Math.random() * (stageH - radius * 2);
+    const dur = (3 + Math.random() * 4).toFixed(1);
+    const delayAnim = (Math.random() * 2).toFixed(1);
+
+    const el = document.createElement('div');
+    el.className = 'bubble';
+    el.style.cssText = `
+      width:${radius*2}px; height:${radius*2}px;
+      left:${x - radius}px; top:${y - radius}px;
+      background: radial-gradient(circle at 35% 35%, ${data.color}cc, ${data.color});
+      animation-duration:${dur}s;
+      animation-delay:-${delayAnim}s;
+    `;
+    el.dataset.label = data.label;
+    el.dataset.base = data.base;
+
+    el.addEventListener('pointerdown', onBubbleTap, { passive: false });
+    stage.appendChild(el);
+    activeBubbles.add(el);
+
+    // Auto-respawn after a while
+    setTimeout(() => {
+      if (el.parentNode) {
+        activeBubbles.delete(el);
+        el.remove();
+        spawnBubble(stage);
+      }
+    }, 8000 + Math.random() * 4000);
+  }, delay);
+}
+
+function onBubbleTap(e) {
+  e.preventDefault();
+  const el = e.currentTarget;
+  if (el.dataset.popping) return;
+  el.dataset.popping = '1';
+  activeBubbles.delete(el);
+
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+
+  el.classList.add('popping');
+  playPop();
+  speak(el.dataset.label);
+  spawnParticles(cx, cy, 16);
+
+  setTimeout(() => {
+    el.remove();
+    const stage = document.getElementById('bubble-stage');
+    if (stage) spawnBubble(stage);
+  }, 380);
+}
+
+// ─────────────────────────────────────────────
+// SCREEN 3: MUSIC TAP
+// ─────────────────────────────────────────────
+const shapeConfig = [
+  { type: 'circle',   color: '#ff6b9d', note: NOTES[0], emoji: '🔴' },
+  { type: 'star',     color: '#fbbf24', note: NOTES[1], emoji: '⭐' },
+  { type: 'square',   color: '#34d399', note: NOTES[2], emoji: '🟩' },
+  { type: 'heart',    color: '#f472b6', note: NOTES[3], emoji: '💗' },
+  { type: 'triangle', color: '#60a5fa', note: NOTES[4], emoji: '🔷' },
+  { type: 'diamond',  color: '#a78bfa', note: NOTES[5], emoji: '💜' },
+];
+
+const shapeSVGs = {
+  circle:   (c) => `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="${c}"/></svg>`,
+  star:     (c) => `<svg viewBox="0 0 100 100"><polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="${c}"/></svg>`,
+  square:   (c) => `<svg viewBox="0 0 100 100"><rect x="8" y="8" width="84" height="84" rx="18" fill="${c}"/></svg>`,
+  heart:    (c) => `<svg viewBox="0 0 100 100"><path d="M50 85 C50 85 10 58 10 32 C10 18 22 8 35 8 C42 8 49 12 50 16 C51 12 58 8 65 8 C78 8 90 18 90 32 C90 58 50 85 50 85Z" fill="${c}"/></svg>`,
+  triangle: (c) => `<svg viewBox="0 0 100 100"><polygon points="50,8 95,90 5,90" fill="${c}"/></svg>`,
+  diamond:  (c) => `<svg viewBox="0 0 100 100"><polygon points="50,5 95,50 50,95 5,50" fill="${c}"/></svg>`,
+};
+
+let musicInitialized = false;
+let magicMode = false;
+
+function initMusic() {
+  if (musicInitialized) return;
+  musicInitialized = true;
+  const grid = document.getElementById('shapes-grid');
+
+  shapeConfig.forEach((cfg, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'shape-btn';
+    btn.innerHTML = shapeSVGs[cfg.type](cfg.color);
+    btn.dataset.note = cfg.note;
+    btn.dataset.idx = i;
+
+    btn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      btn.classList.remove('wiggle');
+      void btn.offsetWidth;
+      btn.classList.add('wiggle');
+      playChime(cfg.note);
+      const rect = btn.getBoundingClientRect();
+      spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, 10);
+      setTimeout(() => btn.classList.remove('wiggle'), 520);
+    });
+
+    grid.appendChild(btn);
+  });
+
+  // Magic mode
+  document.getElementById('magic-toggle').addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    magicMode = !magicMode;
+    e.currentTarget.classList.toggle('on', magicMode);
+    e.currentTarget.textContent = magicMode ? '✨ Magic ON!' : '✨ Magic Mode';
+    if (magicMode) playChime(784);
+  });
+
+  document.getElementById('screen-music').addEventListener('pointerdown', (e) => {
+    if (!magicMode) return;
+    if (e.target.closest('.shape-btn') || e.target.closest('#magic-toggle')) return;
+    e.preventDefault();
+    const note = NOTES[Math.floor(Math.random() * NOTES.length)];
+    playTone(note, 'sine', 0.4, 0.3);
+    spawnStars(e.clientX, e.clientY, 6);
+    spawnParticles(e.clientX, e.clientY, 6);
+  });
+}
+
+// ─────────────────────────────────────────────
+// PREVENT BROWSER DEFAULTS
+// ─────────────────────────────────────────────
+document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+
+// Prevent pull-to-refresh
+document.body.style.overscrollBehavior = 'none';
+document.documentElement.style.overscrollBehavior = 'none';
+
+// Unlock audio on first touch (must await resume)
+document.addEventListener('pointerdown', () => getAudio(), { once: true, passive: true });
+
+// ─────────────────────────────────────────────
+// SERVICE WORKER
+// ─────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
