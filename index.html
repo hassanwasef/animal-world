@@ -203,15 +203,16 @@ html, body {
 }
 #shapes-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: clamp(10px, 3vw, 20px);
-  width: 100%;
-  max-width: 400px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: clamp(10px, 3vw, 18px);
+  width: min(100%, 400px);
   padding: 0 10px;
   flex: 1;
-  align-content: center;
+  min-height: 0;
 }
 .shape-btn {
+  width: 100%;
   aspect-ratio: 1;
   border: none; cursor: pointer;
   border-radius: 28px;
@@ -221,6 +222,10 @@ html, body {
   will-change: transform;
   padding: 0;
   filter: drop-shadow(0 4px 12px rgba(0,0,0,0.18));
+  min-width: 0; min-height: 0;
+}
+.shape-btn svg {
+  width: 100%; height: 100%; display: block;
 }
 .shape-btn:active { transform: scale(0.88); }
 @keyframes shapeWiggle {
@@ -384,30 +389,41 @@ html, body {
 let audioCtx = null;
 let muted = false;
 
-async function getAudio() {
-  if (!audioCtx) {
-    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return null; }
+// Must be called synchronously inside a user-gesture handler.
+// Creates AudioContext + plays a silent buffer to unlock iOS audio.
+function unlockAudio() {
+  if (audioCtx) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return;
   }
-  if (audioCtx.state === 'suspended') {
-    try { await audioCtx.resume(); } catch(e) {}
-  }
-  return audioCtx;
+  try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return; }
+  // iOS requires playing a real (silent) buffer to fully unlock
+  try {
+    const buf = audioCtx.createBuffer(1, 1, 22050);
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf; src.connect(audioCtx.destination); src.start(0);
+  } catch(e) {}
+  if (audioCtx.state === 'suspended') audioCtx.resume();
 }
 
-async function playTone(freq, type='sine', dur=0.4, vol=0.7, delay=0) {
-  if (muted) return;
-  const ac = await getAudio(); if (!ac || ac.state !== 'running') return;
-  const osc = ac.createOscillator();
-  const gain = ac.createGain();
-  osc.connect(gain); gain.connect(ac.destination);
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, ac.currentTime + delay);
-  osc.frequency.exponentialRampToValueAtTime(freq * 0.8, ac.currentTime + delay + dur);
-  gain.gain.setValueAtTime(0, ac.currentTime + delay);
-  gain.gain.linearRampToValueAtTime(vol, ac.currentTime + delay + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + delay + dur);
-  osc.start(ac.currentTime + delay);
-  osc.stop(ac.currentTime + delay + dur + 0.05);
+function ac() { return audioCtx; } // shorthand
+
+function playTone(freq, type='sine', dur=0.4, vol=0.7, delay=0) {
+  if (muted || !audioCtx) return;
+  const ctx = audioCtx;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.8, ctx.currentTime + delay + dur);
+    gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + delay + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + dur + 0.05);
+  } catch(e) {}
 }
 
 function playChime(baseFreq) {
@@ -417,19 +433,21 @@ function playChime(baseFreq) {
   playTone(baseFreq * 2, 'sine', 0.35, 0.35, 0.12);
 }
 
-async function playPop() {
-  if (muted) return;
-  const ac = await getAudio(); if (!ac || ac.state !== 'running') return;
-  const osc = ac.createOscillator();
-  const gain = ac.createGain();
-  osc.connect(gain); gain.connect(ac.destination);
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(900, ac.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(200, ac.currentTime + 0.18);
-  gain.gain.setValueAtTime(0.8, ac.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.22);
-  osc.start(ac.currentTime);
-  osc.stop(ac.currentTime + 0.25);
+function playPop() {
+  if (muted || !audioCtx) return;
+  const ctx = audioCtx;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(900, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.18);
+    gain.gain.setValueAtTime(0.8, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.25);
+  } catch(e) {}
 }
 
 function playAnimalSound(name) {
@@ -650,6 +668,7 @@ function showAnimal(idx) {
 
 function onAnimalTap(e) {
   e.preventDefault();
+  unlockAudio();
   if (animalLocked) return;
   animalLocked = true;
   clearTimeout(animalTimeout);
@@ -757,6 +776,7 @@ function spawnBubble(stage, delay = 0) {
 
 function onBubbleTap(e) {
   e.preventDefault();
+  unlockAudio();
   const el = e.currentTarget;
   if (el.dataset.popping) return;
   el.dataset.popping = '1';
@@ -816,6 +836,7 @@ function initMusic() {
 
     btn.addEventListener('pointerdown', (e) => {
       e.preventDefault();
+      unlockAudio();
       btn.classList.remove('wiggle');
       void btn.offsetWidth;
       btn.classList.add('wiggle');
@@ -905,22 +926,23 @@ function speakArabic(text) {
   speechSynthesis.speak(u);
 }
 
-async function playDuckQuack() {
-  if (muted) return;
-  const ac = await getAudio(); if (!ac || ac.state !== 'running') return;
-  // Three quick quacks: descending pitch
-  [[500,0],[420,0.18],[500,0.36]].forEach(([freq, t]) => {
-    const osc = ac.createOscillator();
-    const gain = ac.createGain();
-    osc.connect(gain); gain.connect(ac.destination);
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(freq, ac.currentTime + t);
-    osc.frequency.exponentialRampToValueAtTime(freq * 0.7, ac.currentTime + t + 0.14);
-    gain.gain.setValueAtTime(0.7, ac.currentTime + t);
-    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + t + 0.16);
-    osc.start(ac.currentTime + t);
-    osc.stop(ac.currentTime + t + 0.18);
-  });
+function playDuckQuack() {
+  if (muted || !audioCtx) return;
+  const ctx = audioCtx;
+  try {
+    [[500,0],[420,0.18],[500,0.36]].forEach(([freq, t]) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + t);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.7, ctx.currentTime + t + 0.14);
+      gain.gain.setValueAtTime(0.7, ctx.currentTime + t);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.16);
+      osc.start(ctx.currentTime + t);
+      osc.stop(ctx.currentTime + t + 0.18);
+    });
+  } catch(e) {}
 }
 
 let ducksInitialized = false;
@@ -940,6 +962,7 @@ function initDucks() {
 
     btn.addEventListener('pointerdown', e => {
       e.preventDefault();
+      unlockAudio();
       btn.classList.remove('quack');
       void btn.offsetWidth;
       btn.classList.add('quack');
@@ -970,8 +993,8 @@ document.addEventListener('gesturechange', e => e.preventDefault());
 document.body.style.overscrollBehavior = 'none';
 document.documentElement.style.overscrollBehavior = 'none';
 
-// Unlock audio on first touch (must await resume)
-document.addEventListener('pointerdown', () => getAudio(), { once: true, passive: true });
+// Unlock audio on first touch — synchronous, capture phase fires before everything else
+document.addEventListener('pointerdown', unlockAudio, { once: true, capture: true, passive: true });
 
 // ─────────────────────────────────────────────
 // SERVICE WORKER
