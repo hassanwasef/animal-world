@@ -274,6 +274,63 @@ html, body {
   0%   { transform: translate(0,0) scale(1) rotate(0deg); opacity: 1; }
   100% { transform: translate(var(--dx), var(--dy)) scale(0) rotate(360deg); opacity: 0; }
 }
+
+/* ═══════════════════════════════════════════
+   SCREEN 4 — DUCK COLORS
+═══════════════════════════════════════════ */
+#screen-ducks {
+  padding: 8px 8px 4px;
+  gap: 0;
+}
+#duck-title {
+  font-size: clamp(22px, 6vw, 34px);
+  font-weight: 900;
+  color: #f59e0b;
+  text-shadow: 0 2px 8px rgba(245,158,11,0.3);
+  margin-bottom: 6px;
+  direction: rtl;
+}
+#duck-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: clamp(8px, 2.5vw, 16px);
+  width: 100%;
+  max-width: 420px;
+  padding: 0 6px;
+  flex: 1;
+  align-content: center;
+}
+.duck-btn {
+  aspect-ratio: 1;
+  border: none; cursor: pointer;
+  background: transparent;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 0;
+  border-radius: 20px;
+  will-change: transform;
+  gap: 4px;
+}
+.duck-btn svg {
+  width: 100%; height: auto;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+}
+.duck-label {
+  font-size: clamp(13px, 3.8vw, 20px);
+  font-weight: 900;
+  direction: rtl;
+  color: #444;
+  line-height: 1;
+}
+@keyframes duckBounce {
+  0%   { transform: scale(1) rotate(0deg); }
+  20%  { transform: scale(1.3) rotate(-10deg); }
+  45%  { transform: scale(0.9) rotate(8deg); }
+  65%  { transform: scale(1.12) rotate(-5deg); }
+  85%  { transform: scale(0.97) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.duck-btn.quack { animation: duckBounce 0.65s cubic-bezier(.34,1.56,.64,1); }
 </style>
 </head>
 <body>
@@ -299,6 +356,12 @@ html, body {
       <div id="shapes-grid"></div>
       <button id="magic-toggle">✨ Magic Mode</button>
     </div>
+
+    <!-- Screen 4: Duck Colors (Arabic) -->
+    <div class="screen right" id="screen-ducks">
+      <div id="duck-title">🦆 الألوان</div>
+      <div id="duck-grid"></div>
+    </div>
   </div>
 
   <nav id="nav">
@@ -307,6 +370,7 @@ html, body {
       <div class="dot active" data-i="0"></div>
       <div class="dot" data-i="1"></div>
       <div class="dot" data-i="2"></div>
+      <div class="dot" data-i="3"></div>
     </div>
     <button class="nav-arrow" id="next-btn">▶</button>
   </nav>
@@ -477,7 +541,7 @@ function spawnStars(x, y, count=8) {
 // ─────────────────────────────────────────────
 // NAVIGATION
 // ─────────────────────────────────────────────
-const screens = ['screen-animals','screen-bubbles','screen-music'];
+const screens = ['screen-animals','screen-bubbles','screen-music','screen-ducks'];
 let currentScreen = 0;
 let isAnimating = false;
 
@@ -502,6 +566,7 @@ function goTo(idx) {
 
   if (idx === 1) initBubbles();
   if (idx === 2) initMusic();
+  if (idx === 3) initDucks();
 
   setTimeout(() => { isAnimating = false; }, 450);
 }
@@ -780,6 +845,116 @@ function initMusic() {
     playTone(note, 'sine', 0.4, 0.3);
     spawnStars(e.clientX, e.clientY, 6);
     spawnParticles(e.clientX, e.clientY, 6);
+  });
+}
+
+// ─────────────────────────────────────────────
+// SCREEN 4: DUCK COLORS (ARABIC)
+// ─────────────────────────────────────────────
+const duckColors = [
+  { color: '#ef4444', body: '#fca5a5', arabic: 'أحمر',    label: 'أحمر'    },
+  { color: '#3b82f6', body: '#93c5fd', arabic: 'أزرق',    label: 'أزرق'    },
+  { color: '#eab308', body: '#fde047', arabic: 'أصفر',    label: 'أصفر'    },
+  { color: '#22c55e', body: '#86efac', arabic: 'أخضر',    label: 'أخضر'    },
+  { color: '#f97316', body: '#fdba74', arabic: 'برتقالي', label: 'برتقالي' },
+  { color: '#a855f7', body: '#d8b4fe', arabic: 'بنفسجي', label: 'بنفسجي'  },
+  { color: '#ec4899', body: '#f9a8d4', arabic: 'وردي',    label: 'وردي'    },
+  { color: '#06b6d4', body: '#67e8f9', arabic: 'سماوي',   label: 'سماوي'   },
+  { color: '#84cc16', body: '#bef264', arabic: 'ليموني',  label: 'ليموني'  },
+];
+
+function duckSVG(bodyColor, darkColor) {
+  return `<svg viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+    <!-- body -->
+    <ellipse cx="60" cy="72" rx="44" ry="34" fill="${bodyColor}"/>
+    <!-- body shine -->
+    <ellipse cx="44" cy="58" rx="14" ry="8" fill="rgba(255,255,255,0.28)" transform="rotate(-20,44,58)"/>
+    <!-- head -->
+    <circle cx="82" cy="38" r="22" fill="${bodyColor}"/>
+    <!-- head shine -->
+    <ellipse cx="74" cy="28" rx="8" ry="5" fill="rgba(255,255,255,0.3)" transform="rotate(-20,74,28)"/>
+    <!-- eye white -->
+    <circle cx="90" cy="30" r="6" fill="white"/>
+    <!-- pupil -->
+    <circle cx="92" cy="30" r="3.5" fill="#1a1a2e"/>
+    <!-- eye shine -->
+    <circle cx="93" cy="28" r="1.2" fill="white"/>
+    <!-- beak top -->
+    <path d="M100 36 Q116 34 114 40 Q116 44 100 42 Z" fill="#ff9500"/>
+    <!-- beak bottom -->
+    <path d="M100 42 Q114 44 112 48 Q110 52 100 48 Z" fill="#e07800"/>
+    <!-- wing -->
+    <ellipse cx="48" cy="74" rx="22" ry="12" fill="${darkColor}" opacity="0.35" transform="rotate(-10,48,74)"/>
+    <!-- tail -->
+    <path d="M18 68 Q4 56 10 72 Q4 82 20 78 Z" fill="${darkColor}" opacity="0.5"/>
+    <!-- feet -->
+    <ellipse cx="48" cy="105" rx="12" ry="5" fill="#ff9500" transform="rotate(-8,48,105)"/>
+    <ellipse cx="70" cy="107" rx="12" ry="5" fill="#ff9500" transform="rotate(5,70,107)"/>
+  </svg>`;
+}
+
+function speakArabic(text) {
+  if (muted || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ar-SA';
+  u.rate = 0.8; u.pitch = 1.2; u.volume = 1;
+  const voices = speechSynthesis.getVoices();
+  const pick = voices.find(v => v.lang.startsWith('ar'));
+  if (pick) u.voice = pick;
+  speechSynthesis.speak(u);
+}
+
+async function playDuckQuack() {
+  if (muted) return;
+  const ac = await getAudio(); if (!ac || ac.state !== 'running') return;
+  // Three quick quacks: descending pitch
+  [[500,0],[420,0.18],[500,0.36]].forEach(([freq, t]) => {
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(freq, ac.currentTime + t);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.7, ac.currentTime + t + 0.14);
+    gain.gain.setValueAtTime(0.7, ac.currentTime + t);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + t + 0.16);
+    osc.start(ac.currentTime + t);
+    osc.stop(ac.currentTime + t + 0.18);
+  });
+}
+
+let ducksInitialized = false;
+function initDucks() {
+  if (ducksInitialized) return;
+  ducksInitialized = true;
+  const grid = document.getElementById('duck-grid');
+
+  duckColors.forEach(cfg => {
+    const btn = document.createElement('button');
+    btn.className = 'duck-btn';
+
+    // Darken body color for details
+    const dark = cfg.color;
+    btn.innerHTML = duckSVG(cfg.body, dark) +
+      `<span class="duck-label" style="color:${cfg.color}">${cfg.label}</span>`;
+
+    btn.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      btn.classList.remove('quack');
+      void btn.offsetWidth;
+      btn.classList.add('quack');
+
+      playDuckQuack();
+      speakArabic(cfg.arabic);
+
+      const rect = btn.getBoundingClientRect();
+      spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, 10);
+      spawnStars(rect.left + rect.width/2, rect.top + rect.height/2, 5);
+
+      setTimeout(() => btn.classList.remove('quack'), 700);
+    });
+
+    grid.appendChild(btn);
   });
 }
 
