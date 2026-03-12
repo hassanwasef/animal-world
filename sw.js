@@ -1,5 +1,8 @@
-const CACHE = 'animal-world-v1';
-const FILES = ['/', '/index.html', '/manifest.json'];
+const CACHE = 'animal-world-v2';
+const FILES = [
+  '/', '/index.html', '/manifest.json',
+  'https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js',
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));

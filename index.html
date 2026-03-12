@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#ff8fab">
 <title>Animal World</title>
 <link rel="manifest" href="manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
 <style>
 * {
   margin: 0; padding: 0; box-sizing: border-box;
@@ -384,99 +385,168 @@ html, body {
 <script>
 'use strict';
 // ─────────────────────────────────────────────
-// AUDIO ENGINE
+// AUDIO ENGINE — Tone.js
 // ─────────────────────────────────────────────
-let audioCtx = null;
 let muted = false;
+let toneReady = false;
 
-// Must be called synchronously inside a user-gesture handler.
-// Creates AudioContext + plays a silent buffer to unlock iOS audio.
+// Called synchronously on first user gesture — required by browsers
 function unlockAudio() {
-  if (audioCtx) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    return;
-  }
-  try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return; }
-  // iOS requires playing a real (silent) buffer to fully unlock
-  try {
-    const buf = audioCtx.createBuffer(1, 1, 22050);
-    const src = audioCtx.createBufferSource();
-    src.buffer = buf; src.connect(audioCtx.destination); src.start(0);
-  } catch(e) {}
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (toneReady) return;
+  toneReady = true;
+  Tone.start().catch(() => {});
 }
 
-function ac() { return audioCtx; } // shorthand
+// ── Shared effects ──
+const limiter = new Tone.Limiter(-3).toDestination();
+const reverb  = new Tone.Reverb({ decay: 1.2, wet: 0.18 }).connect(limiter);
 
-function _schedTone(ctx, freq, type, dur, vol, delay) {
-  try {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = type;
-    const t = ctx.currentTime + delay;
-    osc.frequency.setValueAtTime(freq, t);
-    osc.frequency.exponentialRampToValueAtTime(freq * 0.8, t + dur);
-    gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(vol, t + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    osc.start(t);
-    osc.stop(t + dur + 0.05);
-  } catch(e) {}
-}
+// ── Piano sampler (music screen) ──
+// Uses free Salamander piano samples from Tone.js examples (CORS-enabled)
+const piano = new Tone.Sampler({
+  urls: { C4:'C4.mp3', D4:'D4.mp3', E4:'E4.mp3', G4:'G4.mp3', A4:'A4.mp3', C5:'C5.mp3' },
+  baseUrl: 'https://tonejs.github.io/audio/salamander/',
+  release: 2,
+}).connect(reverb);
 
-function playTone(freq, type='sine', dur=0.4, vol=0.7, delay=0) {
-  if (muted || !audioCtx) return;
-  const ctx = audioCtx;
-  if (ctx.state === 'running') {
-    _schedTone(ctx, freq, type, dur, vol, delay);
-  } else {
-    ctx.resume().then(() => _schedTone(ctx, freq, type, dur, vol, delay)).catch(() => {});
-  }
-}
+const NOTE_NAMES = ['C4','D4','E4','G4','A4','C5'];
+// Keep Hz array for backwards compat
+const NOTES = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
 
-function playChime(baseFreq) {
+function playPianoNote(noteIdx) {
   if (muted) return;
-  playTone(baseFreq, 'sine', 0.5, 0.7, 0);
-  playTone(baseFreq * 1.5, 'sine', 0.4, 0.5, 0.06);
-  playTone(baseFreq * 2, 'sine', 0.35, 0.35, 0.12);
+  try {
+    if (piano.loaded) {
+      piano.triggerAttackRelease(NOTE_NAMES[noteIdx], '8n');
+    } else {
+      // fallback: bell synth while samples load
+      bellSynth.triggerAttackRelease(NOTES[noteIdx], '8n');
+    }
+  } catch(e) {}
 }
+
+// Fallback bell synth (used until piano samples finish loading)
+const bellSynth = new Tone.PolySynth(Tone.Synth, {
+  oscillator: { type: 'triangle' },
+  envelope: { attack: 0.001, decay: 0.4, sustain: 0.1, release: 1.5 },
+  volume: -8,
+}).connect(reverb);
+
+// ── Pop sound (bubbles) ──
+const noisePop = new Tone.NoiseSynth({
+  noise: { type: 'white' },
+  envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 },
+  volume: -4,
+}).connect(limiter);
 
 function playPop() {
-  if (muted || !audioCtx) return;
-  const ctx = audioCtx;
-  const go = () => { try {
-    const osc = ctx.createOscillator(), gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(900, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.18);
-    gain.gain.setValueAtTime(0.8, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
-    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.25);
-  } catch(e) {} };
-  ctx.state === 'running' ? go() : ctx.resume().then(go).catch(() => {});
+  if (muted) return;
+  try { noisePop.triggerAttackRelease('16n'); } catch(e) {}
 }
+
+// ── Animal synths ──
+const catSynth = new Tone.FMSynth({
+  harmonicity: 3, modulationIndex: 10,
+  oscillator: { type: 'sine' },
+  envelope: { attack: 0.02, decay: 0.3, sustain: 0.1, release: 0.4 },
+  modulation: { type: 'sine' },
+  modulationEnvelope: { attack: 0.2, decay: 0.3, sustain: 0.2, release: 0.5 },
+  volume: -6,
+}).connect(limiter);
+
+const dogSynth = new Tone.AMSynth({
+  harmonicity: 1.5,
+  oscillator: { type: 'sawtooth' },
+  envelope: { attack: 0.001, decay: 0.12, sustain: 0.05, release: 0.15 },
+  modulation: { type: 'sawtooth' },
+  modulationEnvelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.1 },
+  volume: -4,
+}).connect(limiter);
+
+const mooSynth = new Tone.FMSynth({
+  harmonicity: 1, modulationIndex: 3,
+  oscillator: { type: 'sawtooth' },
+  envelope: { attack: 0.1, decay: 0.4, sustain: 0.6, release: 0.5 },
+  volume: -4,
+}).connect(limiter);
+
+const chirpSynth = new Tone.Synth({
+  oscillator: { type: 'sine' },
+  envelope: { attack: 0.001, decay: 0.1, sustain: 0.05, release: 0.2 },
+  volume: -6,
+}).connect(reverb);
+
+const deepSynth = new Tone.Synth({
+  oscillator: { type: 'sawtooth' },
+  envelope: { attack: 0.05, decay: 0.6, sustain: 0.3, release: 0.4 },
+  volume: -2,
+}).connect(limiter);
 
 function playAnimalSound(name) {
   if (muted) return;
-  const sounds = {
-    cat:       () => { playTone(700,'sine',0.25,0.7); playTone(620,'sine',0.25,0.7,0.3); },
-    dog:       () => { playTone(200,'sawtooth',0.18,0.8); playTone(160,'sawtooth',0.18,0.8,0.2); playTone(200,'sawtooth',0.18,0.8,0.4); },
-    duck:      () => { playTone(500,'square',0.15,0.7); playTone(420,'square',0.15,0.7,0.18); playTone(500,'square',0.15,0.7,0.36); },
-    cow:       () => { playTone(120,'sawtooth',0.6,0.8); playTone(100,'sawtooth',0.4,0.7,0.4); },
-    fish:      () => { playChime(523); },
-    butterfly: () => { [523,659,784,1047].forEach((f,i)=>playTone(f,'sine',0.25,0.6,i*0.12)); },
-    bunny:     () => { playTone(800,'sine',0.15,0.6); playTone(1000,'sine',0.15,0.5,0.2); },
-    elephant:  () => { playTone(80,'sawtooth',0.7,0.9); playTone(70,'sawtooth',0.5,0.8,0.5); },
-    lion:      () => { playTone(100,'sawtooth',0.8,0.9); playTone(80,'sawtooth',0.6,0.8,0.3); playTone(60,'sawtooth',0.5,0.7,0.6); },
-    frog:      () => { playTone(300,'square',0.15,0.7); playTone(240,'square',0.15,0.7,0.2); },
-  };
-  (sounds[name] || sounds.fish)();
+  const now = Tone.now();
+  try {
+    switch(name) {
+      case 'cat':
+        catSynth.triggerAttackRelease('A4', '8n', now);
+        catSynth.triggerAttackRelease('G4', '8n', now + 0.35);
+        break;
+      case 'dog':
+        dogSynth.triggerAttackRelease('G2', '16n', now);
+        dogSynth.triggerAttackRelease('F2', '16n', now + 0.18);
+        dogSynth.triggerAttackRelease('G2', '16n', now + 0.36);
+        break;
+      case 'duck':
+        chirpSynth.triggerAttackRelease('B4', '16n', now);
+        chirpSynth.triggerAttackRelease('A4', '16n', now + 0.16);
+        chirpSynth.triggerAttackRelease('B4', '16n', now + 0.32);
+        break;
+      case 'cow':
+        mooSynth.triggerAttackRelease('C2', '2n', now);
+        break;
+      case 'elephant':
+        deepSynth.triggerAttackRelease('C1', '4n', now);
+        deepSynth.triggerAttackRelease('B0', '4n', now + 0.5);
+        break;
+      case 'lion':
+        deepSynth.triggerAttackRelease('G1', '4n', now);
+        deepSynth.triggerAttackRelease('E1', '4n', now + 0.3);
+        deepSynth.triggerAttackRelease('C1', '4n', now + 0.6);
+        break;
+      case 'frog':
+        chirpSynth.triggerAttackRelease('D4', '16n', now);
+        chirpSynth.triggerAttackRelease('Bb3', '16n', now + 0.2);
+        break;
+      case 'bunny':
+        chirpSynth.triggerAttackRelease('E5', '32n', now);
+        chirpSynth.triggerAttackRelease('G5', '32n', now + 0.15);
+        break;
+      case 'butterfly':
+      case 'fish':
+      default:
+        ['C5','E5','G5','C6'].forEach((n,i) =>
+          bellSynth.triggerAttackRelease(n, '8n', now + i * 0.12));
+    }
+  } catch(e) {}
 }
 
-// Musical notes for music tap
-const NOTES = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; // C D E G A C5
+// ── Duck quack (duck colors screen) ──
+function playDuckQuack() {
+  if (muted) return;
+  const now = Tone.now();
+  try {
+    chirpSynth.triggerAttackRelease('B4', '16n', now);
+    chirpSynth.triggerAttackRelease('A4', '16n', now + 0.17);
+    chirpSynth.triggerAttackRelease('B4', '16n', now + 0.34);
+  } catch(e) {}
+}
+
+// ── Chime (kept for compatibility) ──
+function playChime(freq) {
+  if (muted) return;
+  const idx = NOTES.findIndex(n => Math.abs(n - freq) < 1);
+  playPianoNote(idx >= 0 ? idx : 0);
+}
 
 // ─────────────────────────────────────────────
 // SPEECH
@@ -848,7 +918,7 @@ function initMusic() {
       btn.classList.remove('wiggle');
       void btn.offsetWidth;
       btn.classList.add('wiggle');
-      playChime(cfg.note);
+      playPianoNote(i);
       const rect = btn.getBoundingClientRect();
       spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, 10);
       setTimeout(() => btn.classList.remove('wiggle'), 520);
@@ -920,24 +990,6 @@ function duckSVG(bodyColor, darkColor) {
     <ellipse cx="48" cy="105" rx="12" ry="5" fill="#ff9500" transform="rotate(-8,48,105)"/>
     <ellipse cx="70" cy="107" rx="12" ry="5" fill="#ff9500" transform="rotate(5,70,107)"/>
   </svg>`;
-}
-
-function playDuckQuack() {
-  if (muted || !audioCtx) return;
-  const ctx = audioCtx;
-  const go = () => { try {
-    [[500,0],[420,0.18],[500,0.36]].forEach(([freq, t]) => {
-      const osc = ctx.createOscillator(), gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime + t);
-      osc.frequency.exponentialRampToValueAtTime(freq * 0.7, ctx.currentTime + t + 0.14);
-      gain.gain.setValueAtTime(0.7, ctx.currentTime + t);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.16);
-      osc.start(ctx.currentTime + t); osc.stop(ctx.currentTime + t + 0.18);
-    });
-  } catch(e) {} };
-  ctx.state === 'running' ? go() : ctx.resume().then(go).catch(() => {});
 }
 
 let ducksInitialized = false;
