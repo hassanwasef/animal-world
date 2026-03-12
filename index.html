@@ -395,6 +395,12 @@ function unlockAudio() {
   if (toneReady) return;
   toneReady = true;
   Tone.start().catch(() => {});
+  // iOS requires speech synthesis to be primed on first user gesture too
+  if (window.speechSynthesis) {
+    const primer = new SpeechSynthesisUtterance('');
+    primer.volume = 0;
+    window.speechSynthesis.speak(primer);
+  }
 }
 
 // ── Shared effects ──
@@ -553,7 +559,8 @@ function playChime(freq) {
 // ─────────────────────────────────────────────
 function speak(text) {
   if (muted || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
+  // Do NOT call cancel() before speak on iOS — it silently breaks the engine.
+  // Instead just speak; utterances are short so overlap is fine for a toddler.
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'en-US';
   u.rate = 0.85; u.pitch = 1.3; u.volume = 1;
@@ -562,7 +569,6 @@ function speak(text) {
 
 function speakArabic(text) {
   if (muted || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'ar-SA';
   u.rate = 0.75; u.pitch = 1.2; u.volume = 1;
