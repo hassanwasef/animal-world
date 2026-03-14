@@ -365,7 +365,9 @@ html, body {
 /* ── Shower ── */
 #shower-area {
   position: absolute;
-  top: 0; right: 8%;
+  top: 0;
+  left: 50%;
+  transform: translateX(30%);
   z-index: 20;
   display: flex;
   flex-direction: column;
@@ -470,10 +472,10 @@ html, body {
 /* ── Bath bear ── */
 #bath-bear {
   position: absolute;
-  top: 4%;
-  left: 4%;
-  width: 18%;
-  max-width: 90px;
+  top: 2%;
+  left: 3%;
+  width: 28%;
+  max-width: 130px;
   cursor: grab;
   z-index: 30;
   will-change: transform;
@@ -1108,11 +1110,17 @@ document.getElementById('prev-btn').addEventListener('pointerdown', e => { e.pre
 document.getElementById('next-btn').addEventListener('pointerdown', e => { e.preventDefault(); goTo(Math.min(screens.length-1, currentScreen+1)); });
 
 // Swipe detection
-let swipeStartX = 0, swipeStartY = 0;
+let swipeStartX = 0, swipeStartY = 0, swipeValid = false;
 document.getElementById('screens').addEventListener('pointerdown', e => {
+  // Don't start swipe if interacting with bath draggables or popups
+  if (activeDrag) { swipeValid = false; return; }
+  if (e.target.closest('#bath-tools, #bath-bear, #shower-area, #duck-picker-overlay, #add-duck-btn, .tub-duck')) { swipeValid = false; return; }
   swipeStartX = e.clientX; swipeStartY = e.clientY;
+  swipeValid = true;
 }, { passive: true });
 document.getElementById('screens').addEventListener('pointerup', e => {
+  if (!swipeValid || activeDrag) return;
+  swipeValid = false;
   const dx = e.clientX - swipeStartX;
   const dy = e.clientY - swipeStartY;
   if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
@@ -1471,7 +1479,7 @@ function initDucks() {
 let activeDrag = null;
 function makeDraggable(el, opts = {}) {
   let isDragging = false;
-  let offsetX, offsetY, origLeft, origTop;
+  let offsetX, offsetY;
 
   function onDown(e) {
     e.preventDefault();
@@ -1480,15 +1488,15 @@ function makeDraggable(el, opts = {}) {
     isDragging = true;
     activeDrag = el;
     const rect = el.getBoundingClientRect();
-    const stage = document.getElementById('bath-stage').getBoundingClientRect();
     offsetX = e.clientX - rect.left;
     offsetY = e.clientY - rect.top;
-    origLeft = rect.left - stage.left;
-    origTop = rect.top - stage.top;
     el.classList.add('dragging');
-    el.style.position = 'absolute';
-    el.style.left = origLeft + 'px';
-    el.style.top = origTop + 'px';
+    // Switch to fixed positioning for viewport-relative dragging
+    el.style.position = 'fixed';
+    el.style.left = rect.left + 'px';
+    el.style.top = rect.top + 'px';
+    el.style.width = rect.width + 'px';
+    el.style.zIndex = '100';
     if (opts.onStart) opts.onStart(el, { x: e.clientX, y: e.clientY });
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', onUp);
@@ -1498,11 +1506,8 @@ function makeDraggable(el, opts = {}) {
   function onMove(e) {
     if (!isDragging) return;
     e.preventDefault();
-    const stage = document.getElementById('bath-stage').getBoundingClientRect();
-    const x = e.clientX - offsetX - stage.left;
-    const y = e.clientY - offsetY - stage.top;
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
+    el.style.left = (e.clientX - offsetX) + 'px';
+    el.style.top = (e.clientY - offsetY) + 'px';
     if (opts.onMove) opts.onMove(el, { x: e.clientX, y: e.clientY });
   }
 
@@ -1516,18 +1521,19 @@ function makeDraggable(el, opts = {}) {
     document.removeEventListener('pointercancel', onUp);
     const pos = e.clientX ? { x: e.clientX, y: e.clientY } : { x: 0, y: 0 };
     if (opts.onEnd) opts.onEnd(el, pos);
-    else if (opts.snapBack) snapBack(el, origLeft, origTop);
   }
 
   el.addEventListener('pointerdown', onDown);
   el.style.touchAction = 'none';
 }
 
-function snapBack(el, x, y) {
-  el.style.transition = 'left 0.3s ease, top 0.3s ease';
-  el.style.left = x + 'px';
-  el.style.top = y + 'px';
-  setTimeout(() => { el.style.transition = ''; }, 320);
+function resetElPosition(el) {
+  el.style.position = '';
+  el.style.left = '';
+  el.style.top = '';
+  el.style.width = '';
+  el.style.zIndex = '';
+  el.style.transition = '';
 }
 
 // ─────────────────────────────────────────────
@@ -1545,8 +1551,8 @@ const bathState = {
   duckCount: 0,
   maxDucks: 8,
   toolOrigPos: {},
-  bearOrigLeft: '4%',
-  bearOrigTop: '4%',
+  bearOrigLeft: '3%',
+  bearOrigTop: '2%',
   spokeTool: {},
 };
 
@@ -1721,7 +1727,7 @@ const bathDuckPalette = [
   { body: '#67e8f9', dark: '#06b6d4', name: 'Cyan' },
 ];
 
-// ── Tub duck spawning ──
+// ── Tub duck spawning + dragging ──
 function spawnTubDuck(palIdx) {
   if (bathState.duckCount >= bathState.maxDucks) return;
   const container = document.getElementById('tub-ducks');
@@ -1734,13 +1740,59 @@ function spawnTubDuck(palIdx) {
   duck.style.animationDelay = (-Math.random() * 2.2) + 's';
   duck.style.animationDuration = (1.8 + Math.random() * 1) + 's';
 
+  // Duck drag state
+  let duckDragging = false, duckOffX, duckOffY, duckMoved = false;
+
   duck.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     e.stopPropagation();
     unlockAudio();
-    playDuckQuack();
+    duckDragging = true;
+    duckMoved = false;
+    activeDrag = duck;
     const r = duck.getBoundingClientRect();
-    spawnParticles(r.left + r.width/2, r.top + r.height/2, 6);
+    duckOffX = e.clientX - r.left;
+    duckOffY = e.clientY - r.top;
+    // Pause bobbing animation
+    duck.style.animation = 'none';
+
+    function duckMove(ev) {
+      if (!duckDragging) return;
+      ev.preventDefault();
+      duckMoved = true;
+      // Constrain to tub
+      const tub = document.getElementById('bathtub').getBoundingClientRect();
+      const cont = container.getBoundingClientRect();
+      let x = ev.clientX - duckOffX - cont.left;
+      let y = ev.clientY - duckOffY - cont.top;
+      // Clamp
+      x = Math.max(0, Math.min(cont.width - 36, x));
+      y = Math.max(0, Math.min(cont.height - 30, y));
+      duck.style.left = x + 'px';
+      duck.style.bottom = 'auto';
+      duck.style.top = y + 'px';
+    }
+
+    function duckUp(ev) {
+      duckDragging = false;
+      activeDrag = null;
+      document.removeEventListener('pointermove', duckMove);
+      document.removeEventListener('pointerup', duckUp);
+      document.removeEventListener('pointercancel', duckUp);
+      // Restore bobbing with new delay
+      duck.style.animation = '';
+      duck.style.animationDelay = (-Math.random() * 2.2) + 's';
+      // If just a tap (no drag), quack
+      if (!duckMoved) {
+        playDuckQuack();
+        const r2 = duck.getBoundingClientRect();
+        spawnParticles(r2.left + r2.width/2, r2.top + r2.height/2, 6);
+      }
+    }
+
+    document.addEventListener('pointermove', duckMove);
+    document.addEventListener('pointerup', duckUp);
+    document.addEventListener('pointercancel', duckUp);
   });
 
   container.appendChild(duck);
@@ -1930,6 +1982,9 @@ function resetBath() {
   bear.querySelectorAll('.towel-wrap, .bear-sparkle').forEach(e => e.remove());
 
   // Restore bear position
+  bear.style.position = 'absolute';
+  bear.style.width = '';
+  bear.style.zIndex = '';
   bear.style.left = bathState.bearOrigLeft;
   bear.style.top = bathState.bearOrigTop;
 
@@ -2011,6 +2066,10 @@ function initBath() {
   // Make bear draggable
   makeDraggable(bear, {
     onEnd: (el, pos) => {
+      // Reset from fixed to absolute within bath-stage
+      el.style.position = 'absolute';
+      el.style.width = '';
+      el.style.zIndex = '';
       if (!bathState.bearInTub && isOverElement(pos, 'bathtub')) {
         dropBearInTub();
       } else if (!bathState.bearInTub) {
@@ -2023,29 +2082,16 @@ function initBath() {
   // Make sponge, soap, shampoo draggable
   ['sponge','soap','shampoo'].forEach(toolName => {
     const toolEl = document.querySelector(`#bath-tools .bath-tool[data-tool="${toolName}"]`);
-    let origLeft, origTop;
 
     makeDraggable(toolEl, {
-      onStart: (el) => {
-        const stage = document.getElementById('bath-stage').getBoundingClientRect();
-        const r = el.getBoundingClientRect();
-        origLeft = r.left - stage.left;
-        origTop = r.top - stage.top;
-      },
       onMove: (el, pos) => {
         if (bathState.bearInTub && isOverBear(pos)) {
           applyToolToBear(toolName, pos);
         }
       },
       onEnd: (el) => {
-        snapBack(el, origLeft, origTop);
-        // Reset to flow position after animation
-        setTimeout(() => {
-          el.style.position = '';
-          el.style.left = '';
-          el.style.top = '';
-          el.style.transition = '';
-        }, 350);
+        // Snap back to shelf by clearing fixed positioning
+        resetElPosition(el);
       }
     });
   });
