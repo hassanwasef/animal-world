@@ -907,15 +907,25 @@ let muted = false;
 let toneReady = false;
 
 // Called synchronously on first user gesture — required by browsers
+let bathAudioPrimed = false;
 function unlockAudio() {
-  if (toneReady) return;
-  toneReady = true;
-  Tone.start().catch(() => {});
-  // iOS requires speech synthesis to be primed on first user gesture too
-  if (window.speechSynthesis) {
-    const primer = new SpeechSynthesisUtterance('');
-    primer.volume = 0;
-    window.speechSynthesis.speak(primer);
+  if (!toneReady) {
+    toneReady = true;
+    Tone.start().catch(() => {});
+    // iOS requires speech synthesis to be primed on first user gesture too
+    if (window.speechSynthesis) {
+      const primer = new SpeechSynthesisUtterance('');
+      primer.volume = 0;
+      window.speechSynthesis.speak(primer);
+    }
+  }
+  // iOS: each Audio element must be play()-ed during a user gesture to unlock
+  if (!bathAudioPrimed && typeof bathAudio !== 'undefined') {
+    bathAudioPrimed = true;
+    Object.values(bathAudio).forEach(a => {
+      a.muted = true;
+      a.play().then(() => { a.pause(); a.currentTime = 0; a.muted = false; }).catch(() => { a.muted = false; });
+    });
   }
 }
 
@@ -2352,7 +2362,13 @@ document.body.style.overscrollBehavior = 'none';
 document.documentElement.style.overscrollBehavior = 'none';
 
 // Unlock audio on first touch — synchronous, capture phase fires before everything else
-document.addEventListener('pointerdown', unlockAudio, { once: true, capture: true, passive: true });
+// Keep firing until both Tone.js and bath audio are primed (iOS needs user gesture for each Audio)
+document.addEventListener('pointerdown', function primeTap() {
+  unlockAudio();
+  if (toneReady && bathAudioPrimed) {
+    document.removeEventListener('pointerdown', primeTap, true);
+  }
+}, { capture: true, passive: true });
 
 // ─────────────────────────────────────────────
 // SERVICE WORKER
