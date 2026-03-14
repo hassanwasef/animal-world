@@ -1,4 +1,4 @@
-const CACHE = 'animal-world-v2';
+const CACHE = 'animal-world-v3';
 const FILES = [
   '/', '/index.html', '/manifest.json',
   'https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js',

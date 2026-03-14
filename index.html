@@ -337,6 +337,380 @@ html, body {
   100% { transform: scale(1) rotate(0deg); }
 }
 .duck-btn.quack { animation: duckBounce 0.65s cubic-bezier(.34,1.56,.64,1); }
+
+/* ═══════════════════════════════════════════
+   SCREEN 5 — BATH TIME
+═══════════════════════════════════════════ */
+#screen-bath {
+  padding: 0;
+  gap: 0;
+  background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 100%);
+}
+#bath-title {
+  font-size: clamp(16px, 4.5vw, 24px);
+  font-weight: 900;
+  color: #0ea5e9;
+  text-shadow: 0 2px 8px rgba(14,165,233,0.3);
+  padding: 8px 0 4px;
+  z-index: 5;
+}
+#bath-stage {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Shower ── */
+#shower-area {
+  position: absolute;
+  top: 0; right: 8%;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#shower-pipe {
+  width: 6px;
+  height: 30px;
+  background: linear-gradient(90deg, #9ca3af, #d1d5db, #9ca3af);
+  border-radius: 3px;
+}
+#shower-nozzle {
+  width: 50px; height: 16px;
+  background: linear-gradient(180deg, #9ca3af, #6b7280);
+  border-radius: 8px 8px 4px 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+#shower-handle {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: 3px solid #b91c1c;
+  cursor: pointer;
+  margin-top: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: transform 0.15s;
+}
+#shower-handle:active { transform: scale(0.88); }
+#shower-handle.on { background: linear-gradient(135deg, #22c55e, #16a34a); border-color: #15803d; }
+#shower-water {
+  display: none;
+  width: 44px;
+  height: 0;
+  position: absolute;
+  top: 46px;
+  left: 3px;
+  overflow: hidden;
+}
+#shower-water.on {
+  display: block;
+  height: 200px;
+}
+.water-stream {
+  position: absolute;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(56,189,248,0.7), rgba(56,189,248,0.2));
+  border-radius: 2px;
+  animation: streamFall 0.6s linear infinite;
+}
+@keyframes streamFall {
+  0% { transform: translateY(-20px); opacity: 0.7; }
+  100% { transform: translateY(20px); opacity: 0.3; }
+}
+
+/* ── Bathtub ── */
+#bathtub {
+  position: absolute;
+  bottom: 22%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 82%;
+  max-width: 340px;
+  height: 38%;
+  border-radius: 12px 12px 40px 40px;
+  background: linear-gradient(180deg, #f5f5f4, #e7e5e4);
+  border: 4px solid #d6d3d1;
+  border-top: 6px solid #e7e5e4;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+#tub-water {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 70%;
+  background: linear-gradient(180deg, rgba(56,189,248,0.35), rgba(14,165,233,0.5));
+  border-radius: 0 0 36px 36px;
+  animation: waterWave 3s ease-in-out infinite;
+}
+@keyframes waterWave {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+#tub-ripples {
+  position: absolute;
+  top: -2px; left: 0; right: 0;
+  height: 8px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent, transparent 12px,
+    rgba(255,255,255,0.45) 12px,
+    rgba(255,255,255,0.45) 24px
+  );
+  animation: rippleMove 2.5s linear infinite;
+}
+@keyframes rippleMove {
+  from { transform: translateX(0); }
+  to { transform: translateX(24px); }
+}
+
+/* ── Bath bear ── */
+#bath-bear {
+  position: absolute;
+  top: 4%;
+  left: 4%;
+  width: 18%;
+  max-width: 90px;
+  cursor: grab;
+  z-index: 30;
+  will-change: transform;
+}
+#bath-bear svg { width: 100%; height: 100%; display: block; }
+#bath-bear.dragging { cursor: grabbing; z-index: 50; }
+.dirt-spot {
+  position: absolute;
+  width: 10px; height: 10px;
+  background: radial-gradient(circle, #92400e 40%, #a16207);
+  border-radius: 50%;
+  opacity: 0.75;
+  transition: opacity 0.5s, transform 0.5s;
+  pointer-events: none;
+}
+.dirt-spot.clean {
+  opacity: 0;
+  transform: scale(0);
+}
+.foam-spot {
+  position: absolute;
+  width: 14px; height: 12px;
+  background: radial-gradient(circle, white 60%, rgba(255,255,255,0.4));
+  border-radius: 50%;
+  opacity: 0.85;
+  animation: foamPulse 1.5s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 31;
+}
+@keyframes foamPulse {
+  from { transform: scale(1); opacity: 0.85; }
+  to { transform: scale(1.2); opacity: 0.6; }
+}
+#bear-lather {
+  position: absolute;
+  top: 0; left: 15%; right: 15%;
+  height: 30%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255,255,255,0.9) 50%, transparent 75%);
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+  z-index: 31;
+}
+#bear-lather.active { opacity: 1; }
+
+/* ── Tub ducks ── */
+#tub-ducks {
+  position: absolute;
+  bottom: 10%; left: 5%; right: 5%;
+  height: 50%;
+  z-index: 15;
+  pointer-events: none;
+}
+.tub-duck {
+  position: absolute;
+  width: 36px;
+  cursor: pointer;
+  pointer-events: auto;
+  animation: duckBob 2.2s ease-in-out infinite alternate;
+  will-change: transform;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+}
+.tub-duck svg { width: 100%; height: auto; }
+@keyframes duckBob {
+  0% { transform: translateY(0) rotate(-4deg); }
+  100% { transform: translateY(-10px) rotate(4deg); }
+}
+#add-duck-btn {
+  position: absolute;
+  top: 4px; right: 4px;
+  border: none;
+  background: rgba(255,255,255,0.75);
+  border-radius: 50%;
+  width: 34px; height: 34px;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 22;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.15s;
+}
+#add-duck-btn:active { transform: scale(0.85); }
+
+/* ── Duck picker popup ── */
+#duck-picker-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 60;
+  align-items: center;
+  justify-content: center;
+}
+#duck-picker-overlay.open { display: flex; }
+#duck-picker {
+  background: white;
+  border-radius: 24px;
+  padding: 14px 10px 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  max-width: 280px;
+  width: 85%;
+  animation: pickerPop 0.3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes pickerPop {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+#duck-picker-title {
+  width: 100%;
+  text-align: center;
+  font-size: clamp(13px, 3.5vw, 17px);
+  font-weight: 900;
+  color: #0ea5e9;
+  margin-bottom: 4px;
+}
+#duck-picker-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.duck-pick-btn {
+  width: 52px; height: 52px;
+  border: 3px solid transparent;
+  border-radius: 16px;
+  background: #f0f9ff;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.15s, border-color 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.duck-pick-btn:active { transform: scale(0.88); }
+.duck-pick-btn svg { width: 100%; height: auto; }
+#duck-picker-close {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  font-size: 14px;
+  font-weight: 800;
+  color: #0ea5e9;
+  cursor: pointer;
+}
+
+/* ── Bath tools shelf ── */
+#bath-tools {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: flex-end;
+  padding: 8px 4px max(6px, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(254,243,199,0) 0%, rgba(254,243,199,0.85) 25%);
+  z-index: 25;
+}
+.bath-tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: grab;
+  will-change: transform;
+  gap: 2px;
+}
+.bath-tool.dragging { cursor: grabbing; z-index: 50; opacity: 0.85; }
+.tool-icon {
+  width: clamp(38px, 11vw, 56px);
+  height: clamp(38px, 11vw, 56px);
+}
+.tool-icon svg { width: 100%; height: 100%; display: block; }
+.tool-label {
+  font-size: clamp(10px, 2.8vw, 13px);
+  font-weight: 800;
+  color: #78350f;
+  line-height: 1;
+}
+
+/* ── Splash effect ── */
+.splash-ring {
+  position: absolute;
+  width: 50px; height: 25px;
+  border: 3px solid rgba(56,189,248,0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 40;
+  animation: splashExpand 0.6s ease-out forwards;
+}
+@keyframes splashExpand {
+  0% { transform: scale(0.3); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* ── Bear drying ── */
+#bath-bear.drying {
+  animation: bearLift 0.8s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes bearLift {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-40px) scale(1.1); }
+  100% { transform: translateY(-30px) scale(1.05); }
+}
+.towel-wrap {
+  position: absolute;
+  width: 90%; height: 60%;
+  bottom: 10%; left: 5%;
+  background: linear-gradient(135deg, #bfdbfe, #93c5fd);
+  border-radius: 20px 20px 30px 30px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 29;
+  animation: towelAppear 0.6s 0.4s ease-out forwards;
+}
+@keyframes towelAppear {
+  0% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0.85; transform: scale(1); }
+}
+.bear-sparkle {
+  position: absolute;
+  top: -10%; left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(28px, 8vw, 40px);
+  z-index: 32;
+  pointer-events: none;
+  animation: sparkleFloat 1.5s ease-out forwards;
+}
+@keyframes sparkleFloat {
+  0% { opacity: 0; transform: translateX(-50%) translateY(0) scale(0.5); }
+  30% { opacity: 1; transform: translateX(-50%) translateY(-10px) scale(1.2); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-30px) scale(0.8); }
+}
 </style>
 </head>
 <body>
@@ -368,6 +742,61 @@ html, body {
       <div id="duck-title">🦆 الألوان</div>
       <div id="duck-grid"></div>
     </div>
+
+    <!-- Screen 5: Bath Time -->
+    <div class="screen right" id="screen-bath">
+      <div id="bath-title">🛁 Bath Time! وقت الاستحمام</div>
+      <div id="bath-stage">
+        <!-- Shower -->
+        <div id="shower-area">
+          <div id="shower-pipe"></div>
+          <div id="shower-nozzle"></div>
+          <div id="shower-water"></div>
+          <div id="shower-handle"></div>
+        </div>
+
+        <!-- Bathtub -->
+        <div id="bathtub">
+          <div id="tub-water">
+            <div id="tub-ripples"></div>
+          </div>
+          <div id="tub-ducks"></div>
+          <button id="add-duck-btn">+🦆</button>
+        </div>
+
+        <!-- Duck picker popup -->
+        <div id="duck-picker-overlay">
+          <div id="duck-picker">
+            <div id="duck-picker-title">Pick a duck! اختار بطة</div>
+            <div id="duck-picker-grid"></div>
+            <button id="duck-picker-close">Close</button>
+          </div>
+        </div>
+
+        <!-- Bear (draggable) -->
+        <div id="bath-bear"></div>
+
+        <!-- Tool shelf -->
+        <div id="bath-tools">
+          <div class="bath-tool" data-tool="sponge">
+            <div class="tool-icon"></div>
+            <div class="tool-label">Sponge</div>
+          </div>
+          <div class="bath-tool" data-tool="soap">
+            <div class="tool-icon"></div>
+            <div class="tool-label">Soap</div>
+          </div>
+          <div class="bath-tool" data-tool="shampoo">
+            <div class="tool-icon"></div>
+            <div class="tool-label">Shampoo</div>
+          </div>
+          <div class="bath-tool" data-tool="towel">
+            <div class="tool-icon"></div>
+            <div class="tool-label">Towel</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <nav id="nav">
@@ -377,6 +806,7 @@ html, body {
       <div class="dot" data-i="1"></div>
       <div class="dot" data-i="2"></div>
       <div class="dot" data-i="3"></div>
+      <div class="dot" data-i="4"></div>
     </div>
     <button class="nav-arrow" id="next-btn">▶</button>
   </nav>
@@ -643,7 +1073,7 @@ function spawnStars(x, y, count=8) {
 // ─────────────────────────────────────────────
 // NAVIGATION
 // ─────────────────────────────────────────────
-const screens = ['screen-animals','screen-bubbles','screen-music','screen-ducks'];
+const screens = ['screen-animals','screen-bubbles','screen-music','screen-ducks','screen-bath'];
 let currentScreen = 0;
 let isAnimating = false;
 
@@ -669,6 +1099,7 @@ function goTo(idx) {
   if (idx === 1) initBubbles();
   if (idx === 2) initMusic();
   if (idx === 3) initDucks();
+  if (idx === 4) initBath();
 
   setTimeout(() => { isAnimating = false; }, 450);
 }
@@ -685,7 +1116,7 @@ document.getElementById('screens').addEventListener('pointerup', e => {
   const dx = e.clientX - swipeStartX;
   const dy = e.clientY - swipeStartY;
   if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-    goTo(dx < 0 ? Math.min(2, currentScreen+1) : Math.max(0, currentScreen-1));
+    goTo(dx < 0 ? Math.min(screens.length-1, currentScreen+1) : Math.max(0, currentScreen-1));
   }
 }, { passive: true });
 
@@ -1032,6 +1463,595 @@ function initDucks() {
 
     grid.appendChild(btn);
   });
+}
+
+// ─────────────────────────────────────────────
+// DRAG & DROP SYSTEM
+// ─────────────────────────────────────────────
+let activeDrag = null;
+function makeDraggable(el, opts = {}) {
+  let isDragging = false;
+  let offsetX, offsetY, origLeft, origTop;
+
+  function onDown(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    unlockAudio();
+    isDragging = true;
+    activeDrag = el;
+    const rect = el.getBoundingClientRect();
+    const stage = document.getElementById('bath-stage').getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    origLeft = rect.left - stage.left;
+    origTop = rect.top - stage.top;
+    el.classList.add('dragging');
+    el.style.position = 'absolute';
+    el.style.left = origLeft + 'px';
+    el.style.top = origTop + 'px';
+    if (opts.onStart) opts.onStart(el, { x: e.clientX, y: e.clientY });
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
+  }
+
+  function onMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    const stage = document.getElementById('bath-stage').getBoundingClientRect();
+    const x = e.clientX - offsetX - stage.left;
+    const y = e.clientY - offsetY - stage.top;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    if (opts.onMove) opts.onMove(el, { x: e.clientX, y: e.clientY });
+  }
+
+  function onUp(e) {
+    if (!isDragging) return;
+    isDragging = false;
+    activeDrag = null;
+    el.classList.remove('dragging');
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('pointercancel', onUp);
+    const pos = e.clientX ? { x: e.clientX, y: e.clientY } : { x: 0, y: 0 };
+    if (opts.onEnd) opts.onEnd(el, pos);
+    else if (opts.snapBack) snapBack(el, origLeft, origTop);
+  }
+
+  el.addEventListener('pointerdown', onDown);
+  el.style.touchAction = 'none';
+}
+
+function snapBack(el, x, y) {
+  el.style.transition = 'left 0.3s ease, top 0.3s ease';
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  setTimeout(() => { el.style.transition = ''; }, 320);
+}
+
+// ─────────────────────────────────────────────
+// SCREEN 5: BATH TIME
+// ─────────────────────────────────────────────
+let bathInitialized = false;
+const bathState = {
+  bearInTub: false,
+  showerOn: false,
+  dirtSpots: [],
+  cleaned: 0,
+  totalDirt: 6,
+  soapApplied: false,
+  shampooApplied: false,
+  duckCount: 0,
+  maxDucks: 8,
+  toolOrigPos: {},
+  bearOrigLeft: '4%',
+  bearOrigTop: '4%',
+  spokeTool: {},
+};
+
+// ── Bear SVG ──
+function bearSVG() {
+  return `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="25" cy="18" r="14" fill="#c2855a"/>
+    <circle cx="25" cy="18" r="8" fill="#dea87a"/>
+    <circle cx="75" cy="18" r="14" fill="#c2855a"/>
+    <circle cx="75" cy="18" r="8" fill="#dea87a"/>
+    <circle cx="50" cy="32" r="26" fill="#c2855a"/>
+    <circle cx="50" cy="38" r="14" fill="#dea87a"/>
+    <circle cx="40" cy="28" r="3.5" fill="#1a1a2e"/>
+    <circle cx="60" cy="28" r="3.5" fill="#1a1a2e"/>
+    <circle cx="41.2" cy="27" r="1.2" fill="white"/>
+    <circle cx="61.2" cy="27" r="1.2" fill="white"/>
+    <ellipse cx="50" cy="35" rx="4" ry="3" fill="#8b5e3c"/>
+    <path d="M43 40 Q50 47 57 40" fill="none" stroke="#8b5e3c" stroke-width="1.8" stroke-linecap="round"/>
+    <ellipse cx="50" cy="78" rx="30" ry="28" fill="#c2855a"/>
+    <ellipse cx="50" cy="80" rx="18" ry="16" fill="#dea87a"/>
+    <ellipse cx="18" cy="70" rx="11" ry="7" fill="#c2855a" transform="rotate(-20,18,70)"/>
+    <ellipse cx="82" cy="70" rx="11" ry="7" fill="#c2855a" transform="rotate(20,82,70)"/>
+    <ellipse cx="35" cy="106" rx="12" ry="8" fill="#c2855a"/>
+    <ellipse cx="65" cy="106" rx="12" ry="8" fill="#c2855a"/>
+  </svg>`;
+}
+
+// ── Tool SVGs ──
+const bathToolSVGs = {
+  sponge: () => `<svg viewBox="0 0 60 50" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="5" width="50" height="40" rx="12" fill="#fbbf24"/>
+    <rect x="5" y="5" width="50" height="40" rx="12" fill="url(#spongeGrad)" opacity="0.3"/>
+    <circle cx="18" cy="18" r="4" fill="#f59e0b" opacity="0.6"/>
+    <circle cx="36" cy="28" r="3.5" fill="#f59e0b" opacity="0.6"/>
+    <circle cx="42" cy="14" r="3" fill="#f59e0b" opacity="0.6"/>
+    <circle cx="22" cy="34" r="3" fill="#f59e0b" opacity="0.6"/>
+    <defs><radialGradient id="spongeGrad"><stop offset="0%" stop-color="white"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>
+  </svg>`,
+  soap: () => `<svg viewBox="0 0 50 55" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="12" width="34" height="38" rx="10" fill="#f9a8d4"/>
+    <rect x="8" y="12" width="34" height="12" rx="6" fill="#fbcfe8"/>
+    <circle cx="18" cy="32" r="4" fill="rgba(255,255,255,0.5)"/>
+    <circle cx="34" cy="40" r="3" fill="rgba(255,255,255,0.5)"/>
+    <circle cx="26" cy="26" r="2.5" fill="rgba(255,255,255,0.4)"/>
+    <text x="25" y="46" text-anchor="middle" font-size="7" fill="#be185d" font-weight="bold">SOAP</text>
+  </svg>`,
+  shampoo: () => `<svg viewBox="0 0 40 65" xmlns="http://www.w3.org/2000/svg">
+    <rect x="10" y="18" width="20" height="42" rx="6" fill="#86efac"/>
+    <rect x="13" y="8" width="14" height="14" rx="4" fill="#4ade80"/>
+    <rect x="15" y="2" width="10" height="8" rx="5" fill="#9ca3af"/>
+    <circle cx="20" cy="38" r="6" fill="rgba(255,255,255,0.3)"/>
+    <text x="20" y="52" text-anchor="middle" font-size="5.5" fill="#166534" font-weight="bold">SHAM</text>
+  </svg>`,
+  towel: () => `<svg viewBox="0 0 55 50" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="10" width="47" height="35" rx="5" fill="#bfdbfe"/>
+    <rect x="4" y="10" width="47" height="10" rx="5" fill="#93c5fd"/>
+    <path d="M40 10 L51 2 L51 10 Z" fill="#dbeafe"/>
+    <line x1="10" y1="28" x2="44" y2="28" stroke="#93c5fd" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <line x1="10" y1="36" x2="44" y2="36" stroke="#93c5fd" stroke-width="1.5" stroke-dasharray="4,3"/>
+  </svg>`,
+};
+
+// ── Bath sounds ──
+function playSplash() {
+  if (muted) return;
+  const now = Tone.now();
+  try {
+    noisePop.triggerAttackRelease('4n', now);
+    chirpSynth.triggerAttackRelease('E5', '16n', now + 0.05);
+    chirpSynth.triggerAttackRelease('C5', '16n', now + 0.15);
+    chirpSynth.triggerAttackRelease('A4', '16n', now + 0.25);
+  } catch(e) {}
+}
+
+function playWaterLoop() {
+  if (muted) return;
+  try { noisePop.triggerAttackRelease('8n'); } catch(e) {}
+}
+
+function playScrub() {
+  if (muted) return;
+  try { noisePop.triggerAttackRelease('32n'); } catch(e) {}
+}
+
+function playSqueak() {
+  if (muted) return;
+  try { chirpSynth.triggerAttackRelease('E6', '32n'); } catch(e) {}
+}
+
+function playCelebration() {
+  if (muted) return;
+  const now = Tone.now();
+  try {
+    ['C5','E5','G5','C6'].forEach((n,i) =>
+      bellSynth.triggerAttackRelease(n, '8n', now + i * 0.15));
+  } catch(e) {}
+}
+
+// ── Helpers ──
+function isOverElement(pos, elId) {
+  const el = document.getElementById(elId);
+  if (!el) return false;
+  const r = el.getBoundingClientRect();
+  return pos.x >= r.left && pos.x <= r.right && pos.y >= r.top && pos.y <= r.bottom;
+}
+
+function isOverBear(pos) {
+  const el = document.getElementById('bath-bear');
+  if (!el) return false;
+  const r = el.getBoundingClientRect();
+  return pos.x >= r.left && pos.x <= r.right && pos.y >= r.top && pos.y <= r.bottom;
+}
+
+function createSplash(parentEl, x, y) {
+  for (let i = 0; i < 3; i++) {
+    const ring = document.createElement('div');
+    ring.className = 'splash-ring';
+    ring.style.left = (x - 25 + (Math.random()-0.5)*20) + 'px';
+    ring.style.top = (y - 12 + (Math.random()-0.5)*10) + 'px';
+    ring.style.animationDelay = (i * 0.12) + 's';
+    parentEl.appendChild(ring);
+    setTimeout(() => ring.remove(), 700);
+  }
+}
+
+function spawnBubbles(x, y, count = 8) {
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'particle';
+    const size = 5 + Math.random() * 10;
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 15 + Math.random() * 35;
+    el.style.cssText = `
+      left:${x}px; top:${y}px;
+      width:${size}px; height:${size}px;
+      background: rgba(255,255,255,0.75);
+      border: 1px solid rgba(56,189,248,0.3);
+      --dx:${Math.cos(angle)*dist}px;
+      --dy:${Math.sin(angle)*dist}px;
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  }
+}
+
+// ── Shower water streams ──
+function createShowerStreams() {
+  const water = document.getElementById('shower-water');
+  water.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const stream = document.createElement('div');
+    stream.className = 'water-stream';
+    stream.style.left = (4 + i * 6) + 'px';
+    stream.style.animationDelay = (-Math.random() * 0.6) + 's';
+    stream.style.opacity = 0.4 + Math.random() * 0.4;
+    water.appendChild(stream);
+  }
+}
+
+// ── Water sound interval ──
+let waterSoundInterval = null;
+
+// ── Duck palette for bath ──
+const bathDuckPalette = [
+  { body: '#fde047', dark: '#eab308', name: 'Yellow' },
+  { body: '#fca5a5', dark: '#ef4444', name: 'Red' },
+  { body: '#93c5fd', dark: '#3b82f6', name: 'Blue' },
+  { body: '#86efac', dark: '#22c55e', name: 'Green' },
+  { body: '#f9a8d4', dark: '#ec4899', name: 'Pink' },
+  { body: '#fdba74', dark: '#f97316', name: 'Orange' },
+  { body: '#d8b4fe', dark: '#a855f7', name: 'Purple' },
+  { body: '#67e8f9', dark: '#06b6d4', name: 'Cyan' },
+];
+
+// ── Tub duck spawning ──
+function spawnTubDuck(palIdx) {
+  if (bathState.duckCount >= bathState.maxDucks) return;
+  const container = document.getElementById('tub-ducks');
+  const pal = bathDuckPalette[palIdx != null ? palIdx : bathState.duckCount % bathDuckPalette.length];
+  const duck = document.createElement('div');
+  duck.className = 'tub-duck';
+  duck.innerHTML = duckSVG(pal.body, pal.dark);
+  duck.style.left = (10 + Math.random() * 55) + '%';
+  duck.style.bottom = (15 + Math.random() * 35) + '%';
+  duck.style.animationDelay = (-Math.random() * 2.2) + 's';
+  duck.style.animationDuration = (1.8 + Math.random() * 1) + 's';
+
+  duck.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    unlockAudio();
+    playDuckQuack();
+    const r = duck.getBoundingClientRect();
+    spawnParticles(r.left + r.width/2, r.top + r.height/2, 6);
+  });
+
+  container.appendChild(duck);
+  bathState.duckCount++;
+}
+
+// ── Duck picker popup ──
+function openDuckPicker() {
+  if (bathState.duckCount >= bathState.maxDucks) return;
+  const overlay = document.getElementById('duck-picker-overlay');
+  const grid = document.getElementById('duck-picker-grid');
+  grid.innerHTML = '';
+
+  bathDuckPalette.forEach((pal, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'duck-pick-btn';
+    btn.innerHTML = duckSVG(pal.body, pal.dark);
+    btn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      unlockAudio();
+      spawnTubDuck(i);
+      playDuckQuack();
+      closeDuckPicker();
+    });
+    grid.appendChild(btn);
+  });
+
+  overlay.classList.add('open');
+}
+
+function closeDuckPicker() {
+  document.getElementById('duck-picker-overlay').classList.remove('open');
+}
+
+// ── Apply tool to bear ──
+let lastToolApply = 0;
+function applyToolToBear(toolName, pos) {
+  const now = Date.now();
+  if (now - lastToolApply < 250) return;
+  lastToolApply = now;
+
+  switch (toolName) {
+    case 'sponge': {
+      const remaining = document.querySelectorAll('#bath-bear .dirt-spot:not(.clean)');
+      if (remaining.length > 0) {
+        remaining[0].classList.add('clean');
+        bathState.cleaned++;
+      }
+      playScrub();
+      spawnBubbles(pos.x, pos.y, 6);
+      if (!bathState.spokeTool.sponge) {
+        bathState.spokeTool.sponge = true;
+        speak('Scrub scrub!');
+        setTimeout(() => speakArabic('لوفة!'), 800);
+      }
+      break;
+    }
+    case 'soap': {
+      bathState.soapApplied = true;
+      playSqueak();
+      // Add foam spots on bear
+      const bear = document.getElementById('bath-bear');
+      const bRect = bear.getBoundingClientRect();
+      const stage = document.getElementById('bath-stage').getBoundingClientRect();
+      for (let i = 0; i < 2; i++) {
+        const foam = document.createElement('div');
+        foam.className = 'foam-spot';
+        foam.style.left = (pos.x - stage.left - 7 + (Math.random()-0.5)*20) + 'px';
+        foam.style.top = (pos.y - stage.top - 6 + (Math.random()-0.5)*20) + 'px';
+        document.getElementById('bath-stage').appendChild(foam);
+      }
+      spawnBubbles(pos.x, pos.y, 5);
+      if (!bathState.spokeTool.soap) {
+        bathState.spokeTool.soap = true;
+        speak('Soap!');
+        setTimeout(() => speakArabic('صابون!'), 800);
+      }
+      break;
+    }
+    case 'shampoo': {
+      bathState.shampooApplied = true;
+      playSqueak();
+      document.getElementById('bear-lather').classList.add('active');
+      spawnBubbles(pos.x, pos.y, 8);
+      if (!bathState.spokeTool.shampoo) {
+        bathState.spokeTool.shampoo = true;
+        speak('Shampoo!');
+        setTimeout(() => speakArabic('شامبو!'), 800);
+      }
+      break;
+    }
+  }
+}
+
+// ── Drop bear into tub ──
+function dropBearInTub() {
+  bathState.bearInTub = true;
+  const bear = document.getElementById('bath-bear');
+  const tub = document.getElementById('bathtub');
+  const stage = document.getElementById('bath-stage');
+  const tubRect = tub.getBoundingClientRect();
+  const stageRect = stage.getBoundingClientRect();
+
+  // Position bear in tub center
+  bear.style.left = (tubRect.left - stageRect.left + tubRect.width * 0.3) + 'px';
+  bear.style.top = (tubRect.top - stageRect.top + tubRect.height * 0.05) + 'px';
+
+  // Splash!
+  createSplash(stage, tubRect.width * 0.45, tubRect.top - stageRect.top + 20);
+  playSplash();
+  speak('Splash!');
+
+  const cx = tubRect.left + tubRect.width / 2;
+  const cy = tubRect.top + 20;
+  spawnParticles(cx, cy, 12);
+}
+
+// ── Toggle shower ──
+function toggleShower(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  unlockAudio();
+  bathState.showerOn = !bathState.showerOn;
+  document.getElementById('shower-water').classList.toggle('on', bathState.showerOn);
+  document.getElementById('shower-handle').classList.toggle('on', bathState.showerOn);
+  if (bathState.showerOn) {
+    playWaterLoop();
+    speak('Water!');
+    setTimeout(() => speakArabic('ماء!'), 600);
+    waterSoundInterval = setInterval(playWaterLoop, 2000);
+  } else {
+    clearInterval(waterSoundInterval);
+    waterSoundInterval = null;
+  }
+}
+
+// ── Towel tap ──
+function onTowelTap(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  unlockAudio();
+  if (!bathState.bearInTub) {
+    speak('Put the bear in the tub first!');
+    return;
+  }
+
+  const bear = document.getElementById('bath-bear');
+  bear.classList.add('drying');
+
+  // Add towel wrap
+  const towel = document.createElement('div');
+  towel.className = 'towel-wrap';
+  bear.appendChild(towel);
+
+  // Sparkle
+  const sparkle = document.createElement('div');
+  sparkle.className = 'bear-sparkle';
+  sparkle.textContent = '✨';
+  bear.appendChild(sparkle);
+
+  speak('All clean!');
+  setTimeout(() => speakArabic('نظيف!'), 600);
+  playCelebration();
+
+  const rect = bear.getBoundingClientRect();
+  spawnStars(rect.left + rect.width/2, rect.top + rect.height/2, 10);
+
+  // Turn off shower
+  if (bathState.showerOn) {
+    bathState.showerOn = false;
+    document.getElementById('shower-water').classList.remove('on');
+    document.getElementById('shower-handle').classList.remove('on');
+    clearInterval(waterSoundInterval);
+    waterSoundInterval = null;
+  }
+
+  setTimeout(resetBath, 3000);
+}
+
+// ── Reset bath ──
+function resetBath() {
+  const bear = document.getElementById('bath-bear');
+  bear.classList.remove('drying');
+
+  // Remove towel and sparkle
+  bear.querySelectorAll('.towel-wrap, .bear-sparkle').forEach(e => e.remove());
+
+  // Restore bear position
+  bear.style.left = bathState.bearOrigLeft;
+  bear.style.top = bathState.bearOrigTop;
+
+  // Restore dirt spots
+  bear.querySelectorAll('.dirt-spot').forEach(s => s.classList.remove('clean'));
+
+  // Remove foam spots
+  document.querySelectorAll('#bath-stage .foam-spot').forEach(f => f.remove());
+
+  // Remove lather
+  const lather = document.getElementById('bear-lather');
+  if (lather) lather.classList.remove('active');
+
+  // Reset state
+  bathState.bearInTub = false;
+  bathState.cleaned = 0;
+  bathState.soapApplied = false;
+  bathState.shampooApplied = false;
+  bathState.spokeTool = {};
+}
+
+// ── Init bath ──
+function initBath() {
+  if (bathInitialized) return;
+  bathInitialized = true;
+
+  const bear = document.getElementById('bath-bear');
+  const stage = document.getElementById('bath-stage');
+
+  // Inject bear SVG + dirt spots + lather
+  bear.innerHTML = bearSVG() +
+    '<div class="dirt-spot" style="top:52%;left:32%"></div>' +
+    '<div class="dirt-spot" style="top:58%;left:58%"></div>' +
+    '<div class="dirt-spot" style="top:68%;left:28%"></div>' +
+    '<div class="dirt-spot" style="top:48%;left:62%"></div>' +
+    '<div class="dirt-spot" style="top:42%;left:18%"></div>' +
+    '<div class="dirt-spot" style="top:62%;left:48%"></div>' +
+    '<div id="bear-lather"></div>';
+
+  // Inject tool SVGs
+  document.querySelectorAll('#bath-tools .bath-tool').forEach(tool => {
+    const type = tool.dataset.tool;
+    if (bathToolSVGs[type]) {
+      tool.querySelector('.tool-icon').innerHTML = bathToolSVGs[type]();
+    }
+  });
+
+  // Create shower streams
+  createShowerStreams();
+
+  // Spawn initial ducks
+  for (let i = 0; i < 2; i++) spawnTubDuck();
+
+  // Shower toggle
+  document.getElementById('shower-handle').addEventListener('pointerdown', toggleShower);
+  document.getElementById('shower-nozzle').addEventListener('pointerdown', toggleShower);
+
+  // Add duck button — opens color picker
+  document.getElementById('add-duck-btn').addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    unlockAudio();
+    openDuckPicker();
+  });
+
+  // Duck picker close button and overlay dismiss
+  document.getElementById('duck-picker-close').addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeDuckPicker();
+  });
+  document.getElementById('duck-picker-overlay').addEventListener('pointerdown', (e) => {
+    if (e.target === e.currentTarget) {
+      e.preventDefault();
+      closeDuckPicker();
+    }
+  });
+
+  // Make bear draggable
+  makeDraggable(bear, {
+    onEnd: (el, pos) => {
+      if (!bathState.bearInTub && isOverElement(pos, 'bathtub')) {
+        dropBearInTub();
+      } else if (!bathState.bearInTub) {
+        el.style.left = bathState.bearOrigLeft;
+        el.style.top = bathState.bearOrigTop;
+      }
+    }
+  });
+
+  // Make sponge, soap, shampoo draggable
+  ['sponge','soap','shampoo'].forEach(toolName => {
+    const toolEl = document.querySelector(`#bath-tools .bath-tool[data-tool="${toolName}"]`);
+    let origLeft, origTop;
+
+    makeDraggable(toolEl, {
+      onStart: (el) => {
+        const stage = document.getElementById('bath-stage').getBoundingClientRect();
+        const r = el.getBoundingClientRect();
+        origLeft = r.left - stage.left;
+        origTop = r.top - stage.top;
+      },
+      onMove: (el, pos) => {
+        if (bathState.bearInTub && isOverBear(pos)) {
+          applyToolToBear(toolName, pos);
+        }
+      },
+      onEnd: (el) => {
+        snapBack(el, origLeft, origTop);
+        // Reset to flow position after animation
+        setTimeout(() => {
+          el.style.position = '';
+          el.style.left = '';
+          el.style.top = '';
+          el.style.transition = '';
+        }, 350);
+      }
+    });
+  });
+
+  // Towel: tap only
+  document.querySelector('#bath-tools .bath-tool[data-tool="towel"]').addEventListener('pointerdown', onTowelTap);
 }
 
 // ─────────────────────────────────────────────
