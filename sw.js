@@ -1,7 +1,15 @@
-const CACHE = 'animal-world-v3';
+const CACHE = 'animal-world-v5';
 const FILES = [
   '/', '/index.html', '/manifest.json',
   'https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js',
+  '/sounds/bathroom-faucet-1.mp3',
+  '/sounds/shower-1.mp3',
+  '/sounds/soap-dispenser-1.mp3',
+  '/sounds/soap-in-hands-1.mp3',
+  '/sounds/drying-hands-1.mp3',
+  '/sounds/11325622-child-laughing-sound-effect-240506.mp3',
+  '/sounds/freesound_community-child-laughing-90664.mp3',
+  '/sounds/sergequadrado-child-ha-ha-103936.mp3',
 ];
 
 self.addEventListener('install', e => {

@@ -87,15 +87,17 @@ html, body {
 }
 .dot.active { background: #ff8fab; transform: scale(1.4); }
 
-/* ── Mute button (parent-only: long press 2s) ── */
+/* ── Mute button ── */
 #mute-btn {
   position: fixed; top: max(8px, env(safe-area-inset-top)); right: 8px;
   z-index: 999;
-  width: 28px; height: 28px; border-radius: 50%;
-  background: rgba(0,0,0,0.12); border: none; cursor: pointer;
-  font-size: 14px; display: flex; align-items: center; justify-content: center;
-  color: rgba(0,0,0,0.4);
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,0.7); border: none; cursor: pointer;
+  font-size: 18px; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.15s;
 }
+#mute-btn:active { transform: scale(0.85); }
 
 /* ═══════════════════════════════════════════
    SCREEN 1 — ANIMAL POP
@@ -367,61 +369,70 @@ html, body {
   position: absolute;
   top: 0;
   left: 50%;
-  transform: translateX(30%);
+  transform: translateX(-50%);
   z-index: 20;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 #shower-pipe {
-  width: 6px;
-  height: 30px;
-  background: linear-gradient(90deg, #9ca3af, #d1d5db, #9ca3af);
-  border-radius: 3px;
+  width: 8px;
+  height: 35px;
+  background: linear-gradient(90deg, #78716c, #d6d3d1, #a8a29e, #d6d3d1, #78716c);
+  border-radius: 4px;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
 }
 #shower-nozzle {
-  width: 50px; height: 16px;
-  background: linear-gradient(180deg, #9ca3af, #6b7280);
-  border-radius: 8px 8px 4px 4px;
+  width: 56px; height: 18px;
+  background: linear-gradient(180deg, #a8a29e, #78716c);
+  border-radius: 10px 10px 5px 5px;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  border-bottom: 2px solid #57534e;
 }
-#shower-handle {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  border: 3px solid #b91c1c;
-  cursor: pointer;
-  margin-top: 4px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  transition: transform 0.15s;
-}
-#shower-handle:active { transform: scale(0.88); }
-#shower-handle.on { background: linear-gradient(135deg, #22c55e, #16a34a); border-color: #15803d; }
+#shower-handle { display: none; }
 #shower-water {
   display: none;
-  width: 44px;
+  width: 50px;
   height: 0;
   position: absolute;
-  top: 46px;
+  top: 53px;
   left: 3px;
   overflow: hidden;
 }
 #shower-water.on {
   display: block;
-  height: 200px;
+  height: 250px;
 }
 .water-stream {
   position: absolute;
-  width: 3px;
+  width: 2.5px;
   height: 100%;
-  background: linear-gradient(180deg, rgba(56,189,248,0.7), rgba(56,189,248,0.2));
+  background: linear-gradient(180deg, rgba(56,189,248,0.8), rgba(125,211,252,0.5), rgba(56,189,248,0.15));
   border-radius: 2px;
-  animation: streamFall 0.6s linear infinite;
+  animation: streamFall 0.5s linear infinite;
+}
+.water-stream:nth-child(odd) {
+  animation-duration: 0.65s;
 }
 @keyframes streamFall {
-  0% { transform: translateY(-20px); opacity: 0.7; }
-  100% { transform: translateY(20px); opacity: 0.3; }
+  0% { transform: translateY(-15px) scaleX(1); opacity: 0.8; }
+  50% { transform: translateY(5px) scaleX(1.3); opacity: 0.6; }
+  100% { transform: translateY(25px) scaleX(0.7); opacity: 0.2; }
+}
+/* Water splash at bottom of streams */
+.water-droplet {
+  position: absolute;
+  bottom: -4px;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(56,189,248,0.5);
+  animation: dropletSplash 0.8s ease-out infinite;
+}
+@keyframes dropletSplash {
+  0% { transform: scale(0.5) translateY(0); opacity: 0.7; }
+  50% { transform: scale(1.2) translateY(-8px); opacity: 0.4; }
+  100% { transform: scale(0.3) translateY(4px); opacity: 0; }
 }
 
 /* ── Bathtub ── */
@@ -433,40 +444,87 @@ html, body {
   width: 82%;
   max-width: 340px;
   height: 38%;
-  border-radius: 12px 12px 40px 40px;
-  background: linear-gradient(180deg, #f5f5f4, #e7e5e4);
+  border-radius: 14px 14px 44px 44px;
+  background: linear-gradient(180deg, #fafaf9 0%, #f5f5f4 30%, #e7e5e4 100%);
   border: 4px solid #d6d3d1;
-  border-top: 6px solid #e7e5e4;
+  border-top: 7px solid #e7e5e4;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14), inset 0 2px 8px rgba(255,255,255,0.6);
+}
+/* Tub rim highlight */
+#bathtub::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+  border-radius: 2px;
+  z-index: 1;
 }
 #tub-water {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 70%;
-  background: linear-gradient(180deg, rgba(56,189,248,0.35), rgba(14,165,233,0.5));
-  border-radius: 0 0 36px 36px;
+  height: 72%;
+  background: linear-gradient(180deg,
+    rgba(125,211,252,0.3) 0%,
+    rgba(56,189,248,0.4) 30%,
+    rgba(14,165,233,0.55) 70%,
+    rgba(2,132,199,0.6) 100%);
+  border-radius: 0 0 40px 40px;
   animation: waterWave 3s ease-in-out infinite;
 }
 @keyframes waterWave {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-3px); }
 }
+/* Water surface shine */
+#tub-water::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 5%; right: 5%;
+  height: 6px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,0.5) 20%,
+    rgba(255,255,255,0.7) 50%,
+    rgba(255,255,255,0.5) 80%,
+    transparent 100%);
+  border-radius: 3px;
+  animation: surfaceShine 4s ease-in-out infinite alternate;
+}
+@keyframes surfaceShine {
+  0% { transform: translateX(-10px); opacity: 0.5; }
+  100% { transform: translateX(10px); opacity: 0.9; }
+}
 #tub-ripples {
   position: absolute;
   top: -2px; left: 0; right: 0;
-  height: 8px;
+  height: 10px;
   background: repeating-linear-gradient(
     90deg,
-    transparent, transparent 12px,
-    rgba(255,255,255,0.45) 12px,
-    rgba(255,255,255,0.45) 24px
+    transparent, transparent 14px,
+    rgba(255,255,255,0.5) 14px,
+    rgba(255,255,255,0.5) 28px
   );
   animation: rippleMove 2.5s linear infinite;
 }
 @keyframes rippleMove {
   from { transform: translateX(0); }
-  to { transform: translateX(24px); }
+  to { transform: translateX(28px); }
+}
+/* Subtle water bubbles */
+.water-bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.6), rgba(255,255,255,0.15));
+  border: 1px solid rgba(255,255,255,0.25);
+  animation: waterBubbleRise 3s ease-in infinite;
+  pointer-events: none;
+}
+@keyframes waterBubbleRise {
+  0% { transform: translateY(0) scale(1); opacity: 0.6; }
+  80% { transform: translateY(-30px) scale(1.1); opacity: 0.3; }
+  100% { transform: translateY(-40px) scale(0.5); opacity: 0; }
 }
 
 /* ── Bath bear ── */
@@ -525,8 +583,8 @@ html, body {
 /* ── Tub ducks ── */
 #tub-ducks {
   position: absolute;
-  bottom: 10%; left: 5%; right: 5%;
-  height: 50%;
+  bottom: 38%; left: 5%; right: 5%;
+  height: 30%;
   z-index: 15;
   pointer-events: none;
 }
@@ -535,14 +593,31 @@ html, body {
   width: 36px;
   cursor: pointer;
   pointer-events: auto;
-  animation: duckBob 2.2s ease-in-out infinite alternate;
+  animation: duckBob 2s ease-in-out infinite alternate;
   will-change: transform;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
 }
+.tub-duck:nth-child(odd) { animation-name: duckBob2; }
+.tub-duck:nth-child(3n) { animation-name: duckBob3; }
 .tub-duck svg { width: 100%; height: auto; }
 @keyframes duckBob {
-  0% { transform: translateY(0) rotate(-4deg); }
-  100% { transform: translateY(-10px) rotate(4deg); }
+  0% { transform: translateY(0) rotate(-5deg); }
+  30% { transform: translateY(-6px) rotate(2deg); }
+  60% { transform: translateY(-3px) rotate(-3deg); }
+  100% { transform: translateY(-8px) rotate(5deg); }
+}
+@keyframes duckBob2 {
+  0% { transform: translateY(-2px) rotate(4deg); }
+  40% { transform: translateY(-10px) rotate(-3deg); }
+  70% { transform: translateY(-5px) rotate(5deg); }
+  100% { transform: translateY(0) rotate(-4deg); }
+}
+@keyframes duckBob3 {
+  0% { transform: translateY(-4px) rotate(-3deg) scaleX(1); }
+  25% { transform: translateY(-8px) rotate(2deg) scaleX(-1); }
+  50% { transform: translateY(-2px) rotate(-4deg) scaleX(-1); }
+  75% { transform: translateY(-10px) rotate(3deg) scaleX(1); }
+  100% { transform: translateY(-4px) rotate(-3deg) scaleX(1); }
 }
 #add-duck-btn {
   position: absolute;
@@ -652,12 +727,7 @@ html, body {
   height: clamp(38px, 11vw, 56px);
 }
 .tool-icon svg { width: 100%; height: 100%; display: block; }
-.tool-label {
-  font-size: clamp(10px, 2.8vw, 13px);
-  font-weight: 800;
-  color: #78350f;
-  line-height: 1;
-}
+.tool-label { display: none; }
 
 /* ── Splash effect ── */
 .splash-ring {
@@ -672,6 +742,20 @@ html, body {
 @keyframes splashExpand {
   0% { transform: scale(0.3); opacity: 1; }
   100% { transform: scale(2); opacity: 0; }
+}
+
+/* ── Bear playing in tub ── */
+#bath-bear.in-tub {
+  animation: bearPlay 3s ease-in-out infinite;
+}
+@keyframes bearPlay {
+  0% { transform: translateY(0) rotate(0deg); }
+  15% { transform: translateY(-6px) rotate(-4deg); }
+  30% { transform: translateY(2px) rotate(3deg); }
+  50% { transform: translateY(-8px) rotate(-2deg) scale(1.03); }
+  70% { transform: translateY(0px) rotate(4deg); }
+  85% { transform: translateY(-4px) rotate(-3deg); }
+  100% { transform: translateY(0) rotate(0deg); }
 }
 
 /* ── Bear drying ── */
@@ -719,7 +803,7 @@ html, body {
 <div id="app">
   <div id="bg"></div>
 
-  <button id="mute-btn" title="Long press to mute">🔊</button>
+  <button id="mute-btn" title="Sound on/off">🔊</button>
 
   <div id="screens">
     <!-- Screen 1: Animal Pop -->
@@ -1129,19 +1213,16 @@ document.getElementById('screens').addEventListener('pointerup', e => {
 }, { passive: true });
 
 // ─────────────────────────────────────────────
-// MUTE (long press 2s)
+// MUTE (tap toggle)
 // ─────────────────────────────────────────────
-let muteTimer = null;
 const muteBtn = document.getElementById('mute-btn');
-muteBtn.addEventListener('pointerdown', () => {
-  muteTimer = setTimeout(() => {
-    muted = !muted;
-    muteBtn.textContent = muted ? '🔇' : '🔊';
-    if (!muted) getAudio(); // resume
-  }, 2000);
+muteBtn.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  muted = !muted;
+  muteBtn.textContent = muted ? '🔇' : '🔊';
+  if (!muted) getAudio();
 });
-muteBtn.addEventListener('pointerup', () => clearTimeout(muteTimer));
-muteBtn.addEventListener('pointerleave', () => clearTimeout(muteTimer));
 
 // ─────────────────────────────────────────────
 // SCREEN 1: ANIMAL POP
@@ -1479,7 +1560,7 @@ function initDucks() {
 let activeDrag = null;
 function makeDraggable(el, opts = {}) {
   let isDragging = false;
-  let offsetX, offsetY;
+  let offsetX, offsetY, origParent, origNextSibling;
 
   function onDown(e) {
     e.preventDefault();
@@ -1488,15 +1569,27 @@ function makeDraggable(el, opts = {}) {
     isDragging = true;
     activeDrag = el;
     const rect = el.getBoundingClientRect();
+    const stage = document.getElementById('bath-stage');
+    const stageRect = stage.getBoundingClientRect();
     offsetX = e.clientX - rect.left;
     offsetY = e.clientY - rect.top;
+
+    // Save original parent for reparenting back on drop
+    origParent = el.parentNode;
+    origNextSibling = el.nextSibling;
+
     el.classList.add('dragging');
-    // Switch to fixed positioning for viewport-relative dragging
-    el.style.position = 'fixed';
-    el.style.left = rect.left + 'px';
-    el.style.top = rect.top + 'px';
+    // Position absolute within bath-stage
+    el.style.position = 'absolute';
+    el.style.left = (rect.left - stageRect.left) + 'px';
+    el.style.top = (rect.top - stageRect.top) + 'px';
     el.style.width = rect.width + 'px';
     el.style.zIndex = '100';
+    // Reparent to bath-stage if not already there (fixes z-index stacking)
+    if (origParent !== stage) {
+      stage.appendChild(el);
+    }
+
     if (opts.onStart) opts.onStart(el, { x: e.clientX, y: e.clientY });
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', onUp);
@@ -1506,8 +1599,10 @@ function makeDraggable(el, opts = {}) {
   function onMove(e) {
     if (!isDragging) return;
     e.preventDefault();
-    el.style.left = (e.clientX - offsetX) + 'px';
-    el.style.top = (e.clientY - offsetY) + 'px';
+    const stage = document.getElementById('bath-stage');
+    const stageRect = stage.getBoundingClientRect();
+    el.style.left = (e.clientX - offsetX - stageRect.left) + 'px';
+    el.style.top = (e.clientY - offsetY - stageRect.top) + 'px';
     if (opts.onMove) opts.onMove(el, { x: e.clientX, y: e.clientY });
   }
 
@@ -1520,20 +1615,27 @@ function makeDraggable(el, opts = {}) {
     document.removeEventListener('pointerup', onUp);
     document.removeEventListener('pointercancel', onUp);
     const pos = e.clientX ? { x: e.clientX, y: e.clientY } : { x: 0, y: 0 };
-    if (opts.onEnd) opts.onEnd(el, pos);
+    if (opts.onEnd) opts.onEnd(el, pos, origParent, origNextSibling);
   }
 
   el.addEventListener('pointerdown', onDown);
   el.style.touchAction = 'none';
 }
 
-function resetElPosition(el) {
+function reparentBack(el, origParent, origNextSibling) {
   el.style.position = '';
   el.style.left = '';
   el.style.top = '';
   el.style.width = '';
   el.style.zIndex = '';
   el.style.transition = '';
+  if (origParent) {
+    if (origNextSibling && origNextSibling.parentNode === origParent) {
+      origParent.insertBefore(el, origNextSibling);
+    } else {
+      origParent.appendChild(el);
+    }
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -1558,25 +1660,52 @@ const bathState = {
 
 // ── Bear SVG ──
 function bearSVG() {
-  return `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+  return `<svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+    <!-- Ears -->
     <circle cx="25" cy="18" r="14" fill="#c2855a"/>
-    <circle cx="25" cy="18" r="8" fill="#dea87a"/>
+    <circle cx="25" cy="18" r="8" fill="#f9a8d4"/>
     <circle cx="75" cy="18" r="14" fill="#c2855a"/>
-    <circle cx="75" cy="18" r="8" fill="#dea87a"/>
-    <circle cx="50" cy="32" r="26" fill="#c2855a"/>
-    <circle cx="50" cy="38" r="14" fill="#dea87a"/>
-    <circle cx="40" cy="28" r="3.5" fill="#1a1a2e"/>
-    <circle cx="60" cy="28" r="3.5" fill="#1a1a2e"/>
-    <circle cx="41.2" cy="27" r="1.2" fill="white"/>
-    <circle cx="61.2" cy="27" r="1.2" fill="white"/>
-    <ellipse cx="50" cy="35" rx="4" ry="3" fill="#8b5e3c"/>
-    <path d="M43 40 Q50 47 57 40" fill="none" stroke="#8b5e3c" stroke-width="1.8" stroke-linecap="round"/>
-    <ellipse cx="50" cy="78" rx="30" ry="28" fill="#c2855a"/>
-    <ellipse cx="50" cy="80" rx="18" ry="16" fill="#dea87a"/>
-    <ellipse cx="18" cy="70" rx="11" ry="7" fill="#c2855a" transform="rotate(-20,18,70)"/>
-    <ellipse cx="82" cy="70" rx="11" ry="7" fill="#c2855a" transform="rotate(20,82,70)"/>
-    <ellipse cx="35" cy="106" rx="12" ry="8" fill="#c2855a"/>
-    <ellipse cx="65" cy="106" rx="12" ry="8" fill="#c2855a"/>
+    <circle cx="75" cy="18" r="8" fill="#f9a8d4"/>
+    <!-- Head -->
+    <circle cx="50" cy="35" r="28" fill="#c2855a"/>
+    <!-- Pink bow on head -->
+    <g transform="translate(72,12)">
+      <path d="M0,0 C-6,-10 -16,-8 -10,0 C-16,8 -6,10 0,0Z" fill="#f472b6"/>
+      <path d="M0,0 C6,-10 16,-8 10,0 C16,8 6,10 0,0Z" fill="#ec4899"/>
+      <circle cx="0" cy="0" r="2.5" fill="#be185d"/>
+    </g>
+    <!-- Face area -->
+    <circle cx="50" cy="41" r="15" fill="#dea87a"/>
+    <!-- Eyes -->
+    <circle cx="40" cy="31" r="3.5" fill="#1a1a2e"/>
+    <circle cx="60" cy="31" r="3.5" fill="#1a1a2e"/>
+    <circle cx="41.2" cy="30" r="1.3" fill="white"/>
+    <circle cx="61.2" cy="30" r="1.3" fill="white"/>
+    <!-- Eyelashes -->
+    <line x1="36" y1="28" x2="34" y2="25" stroke="#1a1a2e" stroke-width="1" stroke-linecap="round"/>
+    <line x1="38" y1="27" x2="37" y2="24" stroke="#1a1a2e" stroke-width="1" stroke-linecap="round"/>
+    <line x1="62" y1="27" x2="63" y2="24" stroke="#1a1a2e" stroke-width="1" stroke-linecap="round"/>
+    <line x1="64" y1="28" x2="66" y2="25" stroke="#1a1a2e" stroke-width="1" stroke-linecap="round"/>
+    <!-- Rosy cheeks -->
+    <circle cx="34" cy="38" r="5" fill="#f9a8d4" opacity="0.5"/>
+    <circle cx="66" cy="38" r="5" fill="#f9a8d4" opacity="0.5"/>
+    <!-- Nose -->
+    <ellipse cx="50" cy="38" rx="3.5" ry="2.5" fill="#8b5e3c"/>
+    <!-- Cute smile -->
+    <path d="M44 43 Q50 49 56 43" fill="none" stroke="#8b5e3c" stroke-width="1.8" stroke-linecap="round"/>
+    <!-- Body -->
+    <ellipse cx="50" cy="82" rx="28" ry="26" fill="#c2855a"/>
+    <ellipse cx="50" cy="84" rx="17" ry="15" fill="#dea87a"/>
+    <!-- Arms -->
+    <ellipse cx="19" cy="75" rx="10" ry="7" fill="#c2855a" transform="rotate(-20,19,75)"/>
+    <ellipse cx="81" cy="75" rx="10" ry="7" fill="#c2855a" transform="rotate(20,81,75)"/>
+    <!-- Feet -->
+    <ellipse cx="35" cy="108" rx="12" ry="8" fill="#c2855a"/>
+    <ellipse cx="65" cy="108" rx="12" ry="8" fill="#c2855a"/>
+    <ellipse cx="35" cy="108" rx="7" ry="5" fill="#dea87a"/>
+    <ellipse cx="65" cy="108" rx="7" ry="5" fill="#dea87a"/>
+    <!-- Small heart on belly -->
+    <path d="M47 80 C47 77 50 76 50 79 C50 76 53 77 53 80 C53 83 50 86 50 86 C50 86 47 83 47 80Z" fill="#f9a8d4" opacity="0.6"/>
   </svg>`;
 }
 
@@ -1606,50 +1735,94 @@ const bathToolSVGs = {
     <circle cx="20" cy="38" r="6" fill="rgba(255,255,255,0.3)"/>
     <text x="20" y="52" text-anchor="middle" font-size="5.5" fill="#166534" font-weight="bold">SHAM</text>
   </svg>`,
-  towel: () => `<svg viewBox="0 0 55 50" xmlns="http://www.w3.org/2000/svg">
-    <rect x="4" y="10" width="47" height="35" rx="5" fill="#bfdbfe"/>
-    <rect x="4" y="10" width="47" height="10" rx="5" fill="#93c5fd"/>
-    <path d="M40 10 L51 2 L51 10 Z" fill="#dbeafe"/>
-    <line x1="10" y1="28" x2="44" y2="28" stroke="#93c5fd" stroke-width="1.5" stroke-dasharray="4,3"/>
-    <line x1="10" y1="36" x2="44" y2="36" stroke="#93c5fd" stroke-width="1.5" stroke-dasharray="4,3"/>
+  towel: () => `<svg viewBox="0 0 60 58" xmlns="http://www.w3.org/2000/svg">
+    <!-- Shadow under towel -->
+    <ellipse cx="30" cy="54" rx="22" ry="3" fill="rgba(0,0,0,0.08)"/>
+    <!-- Back drape hanging down -->
+    <path d="M44 8 Q54 5 55 12 L55 20 Q52 17 46 16 Z" fill="#7db8e8"/>
+    <!-- Main towel body - rolled/folded shape -->
+    <path d="M6 16 C6 11 10 8 14 8 L44 8 C48 8 52 11 52 16 L52 44 C52 48 48 52 44 52 L14 52 C10 52 6 48 6 44 Z" fill="#bfdbfe"/>
+    <!-- Top rolled fold -->
+    <path d="M6 16 C6 11 10 8 14 8 L44 8 C48 8 52 11 52 16 C52 20 48 24 40 22 C32 20 26 22 18 24 C10 26 6 22 6 16 Z" fill="#93c5fd"/>
+    <!-- Roll highlight on top -->
+    <path d="M10 10 Q28 6 48 10" fill="none" stroke="#dbeafe" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Fold shadows for depth -->
+    <path d="M10 24 Q22 20 34 22 Q46 24 52 20" fill="none" stroke="#7cb8f7" stroke-width="1" opacity="0.5"/>
+    <path d="M8 32 Q20 35 34 32 Q46 29 52 33" fill="none" stroke="#93c5fd" stroke-width="0.8" opacity="0.4"/>
+    <path d="M8 40 Q18 42 30 40 Q44 38 52 41" fill="none" stroke="#93c5fd" stroke-width="0.8" opacity="0.35"/>
+    <!-- Texture lines (terry cloth feel) -->
+    <rect x="10" y="28" width="38" height="2" rx="1" fill="#a5d0f5" opacity="0.5"/>
+    <rect x="10" y="36" width="38" height="2" rx="1" fill="#a5d0f5" opacity="0.4"/>
+    <rect x="10" y="43" width="38" height="2" rx="1" fill="#a5d0f5" opacity="0.35"/>
+    <!-- Decorative stripe near bottom -->
+    <rect x="10" y="46" width="38" height="3.5" rx="1.5" fill="#60a5fa" opacity="0.3"/>
+    <rect x="10" y="46.5" width="38" height="1" rx="0.5" fill="#3b82f6" opacity="0.2"/>
+    <!-- Bottom edge with fringe -->
+    <g stroke="#93c5fd" stroke-width="1.2" stroke-linecap="round" opacity="0.5">
+      <line x1="14" y1="52" x2="13" y2="56"/><line x1="18" y1="52" x2="18" y2="57"/>
+      <line x1="22" y1="52" x2="21" y2="56"/><line x1="26" y1="52" x2="26" y2="57"/>
+      <line x1="30" y1="52" x2="29" y2="56"/><line x1="34" y1="52" x2="34" y2="57"/>
+      <line x1="38" y1="52" x2="37" y2="56"/><line x1="42" y1="52" x2="42" y2="57"/>
+    </g>
+    <!-- Corner fold-over -->
+    <path d="M44 8 Q48 4 54 3 L54 8 C50 8 48 8 44 8 Z" fill="#dbeafe"/>
+    <path d="M44 8 Q48 5 54 3" fill="none" stroke="#93c5fd" stroke-width="0.8"/>
   </svg>`,
 };
 
-// ── Bath sounds ──
-function playSplash() {
+// ── Bath sounds (real audio files) ──
+const bathAudio = {
+  splash: new Audio('sounds/bathroom-faucet-1.mp3'),
+  shower: new Audio('sounds/shower-1.mp3'),
+  soap: new Audio('sounds/soap-dispenser-1.mp3'),
+  scrub: new Audio('sounds/soap-in-hands-1.mp3'),
+  dry: new Audio('sounds/drying-hands-1.mp3'),
+  laugh1: new Audio('sounds/11325622-child-laughing-sound-effect-240506.mp3'),
+  laugh2: new Audio('sounds/freesound_community-child-laughing-90664.mp3'),
+  celebrate: new Audio('sounds/sergequadrado-child-ha-ha-103936.mp3'),
+};
+bathAudio.shower.loop = true;
+// Set volumes
+bathAudio.splash.volume = 0.7;
+bathAudio.shower.volume = 0.4;
+bathAudio.soap.volume = 0.8;
+bathAudio.scrub.volume = 0.6;
+bathAudio.dry.volume = 0.7;
+bathAudio.laugh1.volume = 0.6;
+bathAudio.laugh2.volume = 0.6;
+bathAudio.celebrate.volume = 0.7;
+
+function playBathSound(key) {
   if (muted) return;
-  const now = Tone.now();
-  try {
-    noisePop.triggerAttackRelease('4n', now);
-    chirpSynth.triggerAttackRelease('E5', '16n', now + 0.05);
-    chirpSynth.triggerAttackRelease('C5', '16n', now + 0.15);
-    chirpSynth.triggerAttackRelease('A4', '16n', now + 0.25);
-  } catch(e) {}
+  const a = bathAudio[key];
+  if (!a) return;
+  // For non-looping sounds, reset and play
+  if (!a.loop) {
+    a.currentTime = 0;
+  }
+  a.play().catch(() => {});
 }
 
-function playWaterLoop() {
-  if (muted) return;
-  try { noisePop.triggerAttackRelease('8n'); } catch(e) {}
+function stopBathSound(key) {
+  const a = bathAudio[key];
+  if (!a) return;
+  a.pause();
+  a.currentTime = 0;
 }
 
-function playScrub() {
+function playSplash() { playBathSound('splash'); }
+function playScrub() { playBathSound('scrub'); }
+function playSqueak() { playBathSound('soap'); }
+function playLaugh() {
   if (muted) return;
-  try { noisePop.triggerAttackRelease('32n'); } catch(e) {}
+  const key = Math.random() > 0.5 ? 'laugh1' : 'laugh2';
+  playBathSound(key);
 }
+function playCelebration() { playBathSound('celebrate'); }
 
-function playSqueak() {
-  if (muted) return;
-  try { chirpSynth.triggerAttackRelease('E6', '32n'); } catch(e) {}
-}
-
-function playCelebration() {
-  if (muted) return;
-  const now = Tone.now();
-  try {
-    ['C5','E5','G5','C6'].forEach((n,i) =>
-      bellSynth.triggerAttackRelease(n, '8n', now + i * 0.15));
-  } catch(e) {}
-}
+function startShowerSound() { playBathSound('shower'); }
+function stopShowerSound() { stopBathSound('shower'); }
+function playDrySound() { playBathSound('dry'); }
 
 // ── Helpers ──
 function isOverElement(pos, elId) {
@@ -1702,18 +1875,48 @@ function spawnBubbles(x, y, count = 8) {
 function createShowerStreams() {
   const water = document.getElementById('shower-water');
   water.innerHTML = '';
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 8; i++) {
     const stream = document.createElement('div');
     stream.className = 'water-stream';
-    stream.style.left = (4 + i * 6) + 'px';
+    stream.style.left = (3 + i * 5.5) + 'px';
     stream.style.animationDelay = (-Math.random() * 0.6) + 's';
-    stream.style.opacity = 0.4 + Math.random() * 0.4;
+    stream.style.opacity = 0.35 + Math.random() * 0.45;
     water.appendChild(stream);
+  }
+  // Add small droplets at bottom
+  for (let i = 0; i < 4; i++) {
+    const drop = document.createElement('div');
+    drop.className = 'water-droplet';
+    drop.style.left = (6 + i * 10 + Math.random() * 5) + 'px';
+    drop.style.animationDelay = (-Math.random() * 0.8) + 's';
+    drop.style.width = (3 + Math.random() * 3) + 'px';
+    drop.style.height = drop.style.width;
+    water.appendChild(drop);
   }
 }
 
-// ── Water sound interval ──
-let waterSoundInterval = null;
+// ── Water bubbles in tub ──
+let tubBubbleInterval = null;
+function startTubBubbles() {
+  if (tubBubbleInterval) return;
+  const tubWater = document.getElementById('tub-water');
+  tubBubbleInterval = setInterval(() => {
+    const b = document.createElement('div');
+    b.className = 'water-bubble';
+    const size = 4 + Math.random() * 8;
+    b.style.width = size + 'px';
+    b.style.height = size + 'px';
+    b.style.left = (10 + Math.random() * 80) + '%';
+    b.style.bottom = (5 + Math.random() * 20) + '%';
+    b.style.animationDuration = (2 + Math.random() * 2) + 's';
+    tubWater.appendChild(b);
+    setTimeout(() => b.remove(), 4000);
+  }, 600);
+}
+function stopTubBubbles() {
+  clearInterval(tubBubbleInterval);
+  tubBubbleInterval = null;
+}
 
 // ── Duck palette for bath ──
 const bathDuckPalette = [
@@ -1735,8 +1938,8 @@ function spawnTubDuck(palIdx) {
   const duck = document.createElement('div');
   duck.className = 'tub-duck';
   duck.innerHTML = duckSVG(pal.body, pal.dark);
-  duck.style.left = (10 + Math.random() * 55) + '%';
-  duck.style.bottom = (15 + Math.random() * 35) + '%';
+  duck.style.left = (5 + Math.random() * 60) + '%';
+  duck.style.bottom = (20 + Math.random() * 50) + '%';
   duck.style.animationDelay = (-Math.random() * 2.2) + 's';
   duck.style.animationDuration = (1.8 + Math.random() * 1) + 's';
 
@@ -1844,11 +2047,7 @@ function applyToolToBear(toolName, pos) {
       }
       playScrub();
       spawnBubbles(pos.x, pos.y, 6);
-      if (!bathState.spokeTool.sponge) {
-        bathState.spokeTool.sponge = true;
-        speak('Scrub scrub!');
-        setTimeout(() => speakArabic('لوفة!'), 800);
-      }
+      bathState.spokeTool.sponge = true;
       break;
     }
     case 'soap': {
@@ -1866,11 +2065,7 @@ function applyToolToBear(toolName, pos) {
         document.getElementById('bath-stage').appendChild(foam);
       }
       spawnBubbles(pos.x, pos.y, 5);
-      if (!bathState.spokeTool.soap) {
-        bathState.spokeTool.soap = true;
-        speak('Soap!');
-        setTimeout(() => speakArabic('صابون!'), 800);
-      }
+      bathState.spokeTool.soap = true;
       break;
     }
     case 'shampoo': {
@@ -1878,14 +2073,34 @@ function applyToolToBear(toolName, pos) {
       playSqueak();
       document.getElementById('bear-lather').classList.add('active');
       spawnBubbles(pos.x, pos.y, 8);
-      if (!bathState.spokeTool.shampoo) {
-        bathState.spokeTool.shampoo = true;
-        speak('Shampoo!');
-        setTimeout(() => speakArabic('شامبو!'), 800);
-      }
+      bathState.spokeTool.shampoo = true;
       break;
     }
   }
+}
+
+// ── Joyful bath sounds ──
+let joyInterval = null;
+function startJoyfulSpeech() {
+  if (joyInterval) return;
+  // First laugh after splash
+  setTimeout(() => playLaugh(), 1200);
+  // Then every 6-8 seconds
+  joyInterval = setInterval(() => {
+    if (!bathState.bearInTub || muted) return;
+    playLaugh();
+    // Occasional extra splash
+    if (Math.random() > 0.5) {
+      const bear = document.getElementById('bath-bear');
+      const r = bear.getBoundingClientRect();
+      spawnParticles(r.left + r.width/2, r.top + r.height/2, 6);
+      playSplash();
+    }
+  }, 6000 + Math.random() * 2000);
+}
+function stopJoyfulSpeech() {
+  clearInterval(joyInterval);
+  joyInterval = null;
 }
 
 // ── Drop bear into tub ──
@@ -1901,14 +2116,20 @@ function dropBearInTub() {
   bear.style.left = (tubRect.left - stageRect.left + tubRect.width * 0.3) + 'px';
   bear.style.top = (tubRect.top - stageRect.top + tubRect.height * 0.05) + 'px';
 
+  // Add playful animation
+  bear.classList.add('in-tub');
+
   // Splash!
   createSplash(stage, tubRect.width * 0.45, tubRect.top - stageRect.top + 20);
   playSplash();
-  speak('Splash!');
 
   const cx = tubRect.left + tubRect.width / 2;
   const cy = tubRect.top + 20;
-  spawnParticles(cx, cy, 12);
+  spawnParticles(cx, cy, 14);
+
+  // Start joyful speech and water bubbles
+  startJoyfulSpeech();
+  startTubBubbles();
 }
 
 // ── Toggle shower ──
@@ -1920,13 +2141,27 @@ function toggleShower(e) {
   document.getElementById('shower-water').classList.toggle('on', bathState.showerOn);
   document.getElementById('shower-handle').classList.toggle('on', bathState.showerOn);
   if (bathState.showerOn) {
-    playWaterLoop();
-    speak('Water!');
-    setTimeout(() => speakArabic('ماء!'), 600);
-    waterSoundInterval = setInterval(playWaterLoop, 2000);
+    startShowerSound();
+    // Rinse away soap foam and shampoo lather after 2s
+    setTimeout(() => {
+      if (!bathState.showerOn) return;
+      const hadSoap = bathState.soapApplied;
+      const hadShampoo = bathState.shampooApplied;
+      document.querySelectorAll('#bath-stage .foam-spot').forEach(f => {
+        f.style.transition = 'opacity 0.8s';
+        f.style.opacity = '0';
+        setTimeout(() => f.remove(), 900);
+      });
+      const lather = document.getElementById('bear-lather');
+      if (lather) lather.classList.remove('active');
+      bathState.soapApplied = false;
+      bathState.shampooApplied = false;
+      if (hadSoap || hadShampoo) {
+        playSplash();
+      }
+    }, 2000);
   } else {
-    clearInterval(waterSoundInterval);
-    waterSoundInterval = null;
+    stopShowerSound();
   }
 }
 
@@ -1935,13 +2170,14 @@ function onTowelTap(e) {
   e.preventDefault();
   e.stopPropagation();
   unlockAudio();
-  if (!bathState.bearInTub) {
-    speak('Put the bear in the tub first!');
-    return;
-  }
+  if (!bathState.bearInTub) return;
 
   const bear = document.getElementById('bath-bear');
+  bear.classList.remove('in-tub');
   bear.classList.add('drying');
+  stopJoyfulSpeech();
+  stopTubBubbles();
+  playDrySound();
 
   // Add towel wrap
   const towel = document.createElement('div');
@@ -1954,8 +2190,6 @@ function onTowelTap(e) {
   sparkle.textContent = '✨';
   bear.appendChild(sparkle);
 
-  speak('All clean!');
-  setTimeout(() => speakArabic('نظيف!'), 600);
   playCelebration();
 
   const rect = bear.getBoundingClientRect();
@@ -1966,8 +2200,7 @@ function onTowelTap(e) {
     bathState.showerOn = false;
     document.getElementById('shower-water').classList.remove('on');
     document.getElementById('shower-handle').classList.remove('on');
-    clearInterval(waterSoundInterval);
-    waterSoundInterval = null;
+    stopShowerSound();
   }
 
   setTimeout(resetBath, 3000);
@@ -1976,7 +2209,14 @@ function onTowelTap(e) {
 // ── Reset bath ──
 function resetBath() {
   const bear = document.getElementById('bath-bear');
-  bear.classList.remove('drying');
+  bear.classList.remove('drying', 'in-tub');
+
+  // Stop all bath sounds
+  stopJoyfulSpeech();
+  stopTubBubbles();
+  stopShowerSound();
+  stopBathSound('dry');
+  stopBathSound('celebrate');
 
   // Remove towel and sparkle
   bear.querySelectorAll('.towel-wrap, .bear-sparkle').forEach(e => e.remove());
@@ -1991,8 +2231,9 @@ function resetBath() {
   // Restore dirt spots
   bear.querySelectorAll('.dirt-spot').forEach(s => s.classList.remove('clean'));
 
-  // Remove foam spots
+  // Remove foam spots and water bubbles
   document.querySelectorAll('#bath-stage .foam-spot').forEach(f => f.remove());
+  document.querySelectorAll('#tub-water .water-bubble').forEach(b => b.remove());
 
   // Remove lather
   const lather = document.getElementById('bear-lather');
@@ -2065,9 +2306,7 @@ function initBath() {
 
   // Make bear draggable
   makeDraggable(bear, {
-    onEnd: (el, pos) => {
-      // Reset from fixed to absolute within bath-stage
-      el.style.position = 'absolute';
+    onEnd: (el, pos, origParent, origNextSibling) => {
       el.style.width = '';
       el.style.zIndex = '';
       if (!bathState.bearInTub && isOverElement(pos, 'bathtub')) {
@@ -2089,9 +2328,9 @@ function initBath() {
           applyToolToBear(toolName, pos);
         }
       },
-      onEnd: (el) => {
-        // Snap back to shelf by clearing fixed positioning
-        resetElPosition(el);
+      onEnd: (el, pos, origParent, origNextSibling) => {
+        // Reparent back to tool shelf
+        reparentBack(el, origParent, origNextSibling);
       }
     });
   });
