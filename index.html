@@ -797,6 +797,230 @@ html, body {
   30% { opacity: 1; transform: translateX(-50%) translateY(-10px) scale(1.2); }
   100% { opacity: 0; transform: translateX(-50%) translateY(-30px) scale(0.8); }
 }
+
+/* ═══════════════════════════════════════════
+   SCREEN 6 — TOOTH BRUSHING
+═══════════════════════════════════════════ */
+#screen-tooth {
+  padding: 0; gap: 0;
+  background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 40%, #bbf7d0 100%);
+}
+#tooth-title {
+  font-size: clamp(16px, 4.5vw, 24px);
+  font-weight: 900;
+  color: #16a34a;
+  text-shadow: 0 2px 8px rgba(22,163,74,0.3);
+  padding: 8px 0 4px;
+  z-index: 5;
+}
+#tooth-stage {
+  position: relative;
+  width: 100%; flex: 1;
+  min-height: 0; overflow: hidden;
+}
+
+/* Rabbit container */
+#tooth-rabbit {
+  position: absolute;
+  left: 50%; top: 5%;
+  transform: translateX(-50%);
+  width: min(65%, 260px);
+  z-index: 2;
+}
+#tooth-rabbit svg { width: 100%; height: auto; }
+
+/* Mouth/teeth overlay area */
+#rabbit-mouth-zone {
+  position: absolute;
+  left: 50%; top: 52%;
+  transform: translateX(-50%);
+  width: 30%; height: 14%;
+  z-index: 3;
+  border-radius: 50%;
+}
+
+/* Tools shelf */
+#tooth-tools {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: clamp(16px, 5vw, 32px);
+  z-index: 10;
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+.tooth-tool {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  cursor: pointer; touch-action: none;
+}
+.tooth-tool .tool-icon {
+  width: clamp(52px, 14vw, 80px);
+  height: clamp(52px, 14vw, 80px);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.15));
+}
+.tooth-tool .tool-icon svg { width: 100%; height: 100%; }
+.tooth-tool .tool-label {
+  font-size: clamp(10px, 3vw, 14px);
+  font-weight: 800;
+  color: #444;
+}
+.tooth-tool.dragging { z-index: 100; }
+.tooth-tool.dragging .tool-icon { transform: scale(1.15); }
+.tooth-tool.used { opacity: 0.4; pointer-events: none; }
+
+/* Progress bar */
+#tooth-progress-wrap {
+  position: absolute;
+  top: 8px; right: 12px;
+  display: flex; align-items: center; gap: 6px;
+  z-index: 10;
+  background: rgba(255,255,255,0.8);
+  padding: 6px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+#tooth-progress-bar {
+  width: 80px; height: 10px;
+  background: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+}
+#tooth-progress-fill {
+  width: 0%; height: 100%;
+  background: linear-gradient(90deg, #4ade80, #22c55e);
+  border-radius: 5px;
+  transition: width 0.4s ease;
+}
+#tooth-progress-icon { font-size: 18px; }
+
+/* Instruction hint */
+#tooth-hint {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 15;
+  background: rgba(255,255,255,0.92);
+  padding: 12px 22px;
+  border-radius: 18px;
+  font-size: clamp(14px, 4vw, 20px);
+  font-weight: 800;
+  color: #16a34a;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  pointer-events: none;
+  animation: hintPulse 2s ease-in-out infinite;
+  text-align: center;
+  white-space: nowrap;
+}
+@keyframes hintPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.05); }
+}
+#tooth-hint.hidden { display: none; }
+
+/* Paste on brush indicator */
+.paste-blob {
+  position: absolute;
+  top: 2px; left: 50%;
+  transform: translateX(-50%);
+  width: 24px; height: 10px;
+  background: linear-gradient(180deg, #93c5fd, #3b82f6);
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: 0 1px 4px rgba(59,130,246,0.4);
+  animation: pasteWobble 1.5s ease-in-out infinite;
+}
+@keyframes pasteWobble {
+  0%, 100% { transform: translateX(-50%) scaleX(1); }
+  50% { transform: translateX(-50%) scaleX(1.1); }
+}
+
+/* Sparkle on clean teeth */
+.tooth-sparkle {
+  position: absolute;
+  pointer-events: none;
+  z-index: 20;
+  font-size: 20px;
+  animation: toothSparklePop 0.8s ease-out forwards;
+}
+@keyframes toothSparklePop {
+  0% { transform: scale(0) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.3) rotate(180deg); opacity: 1; }
+  100% { transform: scale(0.5) rotate(360deg); opacity: 0; }
+}
+
+/* Foam bubbles while brushing */
+.brush-foam {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  box-shadow: inset -2px -2px 4px rgba(0,0,0,0.05);
+  animation: foamRise 1.2s ease-out forwards;
+  z-index: 15;
+}
+@keyframes foamRise {
+  0% { transform: scale(0.3) translateY(0); opacity: 0.9; }
+  60% { transform: scale(1) translateY(-15px); opacity: 0.7; }
+  100% { transform: scale(0.6) translateY(-30px); opacity: 0; }
+}
+
+/* Celebration overlay */
+#tooth-celebrate {
+  position: absolute; inset: 0;
+  display: none;
+  align-items: center; justify-content: center;
+  flex-direction: column;
+  background: rgba(255,255,255,0.85);
+  z-index: 50;
+  animation: celebFadeIn 0.5s ease;
+}
+#tooth-celebrate.show { display: flex; }
+@keyframes celebFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+#tooth-celebrate .celeb-text {
+  font-size: clamp(28px, 8vw, 48px);
+  font-weight: 900;
+  background: linear-gradient(135deg, #22c55e, #3b82f6, #a855f7);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  animation: celebBounce 0.8s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes celebBounce {
+  0% { transform: scale(0.3); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+#tooth-celebrate .celeb-emoji {
+  font-size: clamp(50px, 15vw, 90px);
+  animation: celebBounce 0.8s cubic-bezier(.34,1.56,.64,1) 0.2s both;
+}
+#tooth-celebrate .celeb-sub {
+  font-size: clamp(14px, 4vw, 20px);
+  color: #666;
+  font-weight: 700;
+  margin-top: 8px;
+}
+#tooth-replay-btn {
+  margin-top: 18px;
+  padding: 12px 32px;
+  border: none; border-radius: 50px;
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  color: white;
+  font-size: clamp(16px, 4.5vw, 22px);
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(34,197,94,0.4);
+  transition: transform 0.15s;
+  font-family: inherit;
+}
+#tooth-replay-btn:active { transform: scale(0.93); }
 </style>
 </head>
 <body>
@@ -883,6 +1107,35 @@ html, body {
         </div>
       </div>
     </div>
+
+    <!-- Screen 6: Tooth Brushing -->
+    <div class="screen right" id="screen-tooth">
+      <div id="tooth-title">🪥 Brush the Teeth! نظّف الأسنان</div>
+      <div id="tooth-stage">
+        <div id="tooth-progress-wrap">
+          <span id="tooth-progress-icon">🦷</span>
+          <div id="tooth-progress-bar"><div id="tooth-progress-fill"></div></div>
+        </div>
+        <div id="tooth-rabbit"></div>
+        <div id="tooth-hint">👆 Drag toothpaste to the brush!</div>
+        <div id="tooth-tools">
+          <div class="tooth-tool" data-tool="paste">
+            <div class="tool-icon" id="paste-icon"></div>
+            <div class="tool-label">Toothpaste</div>
+          </div>
+          <div class="tooth-tool" data-tool="brush">
+            <div class="tool-icon" id="brush-icon"></div>
+            <div class="tool-label">Toothbrush</div>
+          </div>
+        </div>
+        <div id="tooth-celebrate">
+          <div class="celeb-emoji">🐰✨</div>
+          <div class="celeb-text">Sparkling Clean!</div>
+          <div class="celeb-sub">Great job brushing!</div>
+          <button id="tooth-replay-btn">Play Again 🔄</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <nav id="nav">
@@ -893,6 +1146,7 @@ html, body {
       <div class="dot" data-i="2"></div>
       <div class="dot" data-i="3"></div>
       <div class="dot" data-i="4"></div>
+      <div class="dot" data-i="5"></div>
     </div>
     <button class="nav-arrow" id="next-btn">▶</button>
   </nav>
@@ -1169,7 +1423,7 @@ function spawnStars(x, y, count=8) {
 // ─────────────────────────────────────────────
 // NAVIGATION
 // ─────────────────────────────────────────────
-const screens = ['screen-animals','screen-bubbles','screen-music','screen-ducks','screen-bath'];
+const screens = ['screen-animals','screen-bubbles','screen-music','screen-ducks','screen-bath','screen-tooth'];
 let currentScreen = 0;
 let isAnimating = false;
 
@@ -1196,6 +1450,7 @@ function goTo(idx) {
   if (idx === 2) initMusic();
   if (idx === 3) initDucks();
   if (idx === 4) initBath();
+  if (idx === 5) initToothBrush();
 
   setTimeout(() => { isAnimating = false; }, 450);
 }
@@ -1208,7 +1463,7 @@ let swipeStartX = 0, swipeStartY = 0, swipeValid = false;
 document.getElementById('screens').addEventListener('pointerdown', e => {
   // Don't start swipe if interacting with bath draggables or popups
   if (activeDrag) { swipeValid = false; return; }
-  if (e.target.closest('#bath-tools, #bath-bear, #shower-area, #duck-picker-overlay, #add-duck-btn, .tub-duck')) { swipeValid = false; return; }
+  if (e.target.closest('#bath-tools, #bath-bear, #shower-area, #duck-picker-overlay, #add-duck-btn, .tub-duck, #tooth-tools, .tooth-tool')) { swipeValid = false; return; }
   swipeStartX = e.clientX; swipeStartY = e.clientY;
   swipeValid = true;
 }, { passive: true });
@@ -2347,6 +2602,569 @@ function initBath() {
 
   // Towel: tap only
   document.querySelector('#bath-tools .bath-tool[data-tool="towel"]').addEventListener('pointerdown', onTowelTap);
+}
+
+// ─────────────────────────────────────────────
+// SCREEN 6: TOOTH BRUSHING
+// ─────────────────────────────────────────────
+let toothInitialized = false;
+const toothState = {
+  phase: 'paste',       // 'paste' → 'brush' → 'done'
+  pasteApplied: false,
+  cleanProgress: 0,     // 0-100
+  totalStrokes: 20,     // strokes needed to fully clean
+  strokeCount: 0,
+  brushing: false,
+};
+
+// ── Rabbit SVG with dirty teeth ──
+function rabbitSVG(teethColor, teethShine) {
+  const stainOpacity = Math.max(0, 1 - toothState.cleanProgress / 100);
+  const shineOpacity = Math.min(1, toothState.cleanProgress / 80);
+  return `<svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+    <!-- Long ears -->
+    <ellipse cx="70" cy="45" rx="22" ry="60" fill="#e8c4a0" transform="rotate(-12,70,45)"/>
+    <ellipse cx="70" cy="45" rx="14" ry="48" fill="#f9c4d2" transform="rotate(-12,70,45)"/>
+    <ellipse cx="130" cy="45" rx="22" ry="60" fill="#e8c4a0" transform="rotate(12,130,45)"/>
+    <ellipse cx="130" cy="45" rx="14" ry="48" fill="#f9c4d2" transform="rotate(12,130,45)"/>
+    <!-- Ear tips slightly rounded -->
+    <circle cx="64" cy="-8" r="8" fill="#e8c4a0" transform="rotate(-12,70,45)"/>
+    <circle cx="136" cy="-8" r="8" fill="#e8c4a0" transform="rotate(12,130,45)"/>
+
+    <!-- Head -->
+    <ellipse cx="100" cy="120" rx="55" ry="50" fill="#e8c4a0"/>
+
+    <!-- Pink bow on right ear -->
+    <g transform="translate(148,30)">
+      <path d="M0,0 C-8,-14 -22,-10 -13,0 C-22,10 -8,14 0,0Z" fill="#f472b6"/>
+      <path d="M0,0 C8,-14 22,-10 13,0 C22,10 8,14 0,0Z" fill="#ec4899"/>
+      <circle cx="0" cy="0" r="3.5" fill="#be185d"/>
+    </g>
+
+    <!-- Fluffy cheeks -->
+    <circle cx="52" cy="132" r="16" fill="#fce4ec" opacity="0.7"/>
+    <circle cx="148" cy="132" r="16" fill="#fce4ec" opacity="0.7"/>
+
+    <!-- Eyes - big cute anime style -->
+    <ellipse cx="78" cy="110" rx="12" ry="13" fill="white"/>
+    <ellipse cx="122" cy="110" rx="12" ry="13" fill="white"/>
+    <circle cx="80" cy="110" r="8" fill="#3b1a08"/>
+    <circle cx="124" cy="110" r="8" fill="#3b1a08"/>
+    <circle cx="83" cy="107" r="3.5" fill="white"/>
+    <circle cx="127" cy="107" r="3.5" fill="white"/>
+    <circle cx="78" cy="113" r="1.8" fill="white" opacity="0.6"/>
+    <circle cx="122" cy="113" r="1.8" fill="white" opacity="0.6"/>
+
+    <!-- Eyelashes -->
+    <line x1="67" y1="102" x2="62" y2="97" stroke="#3b1a08" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="71" y1="99" x2="68" y2="94" stroke="#3b1a08" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="129" y1="99" x2="132" y2="94" stroke="#3b1a08" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="133" y1="102" x2="138" y2="97" stroke="#3b1a08" stroke-width="1.8" stroke-linecap="round"/>
+
+    <!-- Nose - pink triangle -->
+    <path d="M95 128 L105 128 L100 135Z" fill="#f9a8d4"/>
+    <ellipse cx="100" cy="129" rx="6" ry="4" fill="#f9a8d4"/>
+
+    <!-- Whiskers -->
+    <line x1="55" y1="130" x2="20" y2="124" stroke="#ccc" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="55" y1="135" x2="18" y2="136" stroke="#ccc" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="55" y1="140" x2="20" y2="148" stroke="#ccc" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="145" y1="130" x2="180" y2="124" stroke="#ccc" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="145" y1="135" x2="182" y2="136" stroke="#ccc" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="145" y1="140" x2="180" y2="148" stroke="#ccc" stroke-width="1.2" stroke-linecap="round"/>
+
+    <!-- Open mouth -->
+    <ellipse cx="100" cy="152" rx="28" ry="20" fill="#8b2252"/>
+    <ellipse cx="100" cy="148" rx="26" ry="12" fill="#a0294a"/>
+
+    <!-- Tongue -->
+    <ellipse cx="100" cy="162" rx="14" ry="8" fill="#e8657a"/>
+
+    <!-- Upper teeth row -->
+    <rect x="76" y="140" width="10" height="13" rx="3" fill="${teethColor}" stroke="#ddd" stroke-width="0.5"/>
+    <rect x="87" y="139" width="10" height="14" rx="3" fill="${teethColor}" stroke="#ddd" stroke-width="0.5"/>
+    <rect x="98" y="139" width="10" height="14" rx="3" fill="${teethColor}" stroke="#ddd" stroke-width="0.5"/>
+    <rect x="109" y="140" width="10" height="13" rx="3" fill="${teethColor}" stroke="#ddd" stroke-width="0.5"/>
+
+    <!-- Lower teeth row -->
+    <rect x="80" y="157" width="9" height="11" rx="3" fill="${teethColor}" stroke="#ddd" stroke-width="0.5"/>
+    <rect x="90" y="158" width="9" height="11" rx="3" fill="${teethColor}" stroke="#ddd" stroke-width="0.5"/>
+    <rect x="100" y="158" width="9" height="11" rx="3" fill="${teethColor}" stroke="#ddd" stroke-width="0.5"/>
+    <rect x="110" y="157" width="9" height="11" rx="3" fill="${teethColor}" stroke="#ddd" stroke-width="0.5"/>
+
+    <!-- Dirt stains on teeth (fade as cleaning) -->
+    <g opacity="${stainOpacity}">
+      <circle cx="82" cy="146" r="2.5" fill="#a08040" opacity="0.7"/>
+      <circle cx="95" cy="148" r="2" fill="#8a7030" opacity="0.6"/>
+      <circle cx="106" cy="146" r="2.8" fill="#a08040" opacity="0.65"/>
+      <circle cx="114" cy="147" r="2" fill="#908050" opacity="0.7"/>
+      <circle cx="86" cy="162" r="2" fill="#9a7838" opacity="0.6"/>
+      <circle cx="104" cy="163" r="2.5" fill="#a08040" opacity="0.65"/>
+      <circle cx="115" cy="161" r="1.8" fill="#908050" opacity="0.5"/>
+    </g>
+
+    <!-- Sparkle/shine on teeth (appear as cleaning) -->
+    <g opacity="${shineOpacity}">
+      <text x="82" y="148" font-size="6" fill="white" opacity="0.9">✦</text>
+      <text x="98" y="147" font-size="7" fill="white" opacity="0.95">✦</text>
+      <text x="112" y="148" font-size="5" fill="white" opacity="0.85">✦</text>
+      <text x="90" y="165" font-size="5" fill="white" opacity="0.9">✦</text>
+      <text x="107" y="164" font-size="6" fill="white" opacity="0.85">✦</text>
+    </g>
+
+    <!-- Body -->
+    <ellipse cx="100" cy="220" rx="50" ry="45" fill="#e8c4a0"/>
+    <ellipse cx="100" cy="224" rx="32" ry="28" fill="#f5e0c8"/>
+
+    <!-- Arms -->
+    <ellipse cx="46" cy="210" rx="16" ry="12" fill="#e8c4a0" transform="rotate(-15,46,210)"/>
+    <ellipse cx="154" cy="210" rx="16" ry="12" fill="#e8c4a0" transform="rotate(15,154,210)"/>
+
+    <!-- Feet -->
+    <ellipse cx="72" cy="262" rx="18" ry="12" fill="#e8c4a0"/>
+    <ellipse cx="128" cy="262" rx="18" ry="12" fill="#e8c4a0"/>
+    <ellipse cx="72" cy="264" rx="10" ry="7" fill="#f9c4d2"/>
+    <ellipse cx="128" cy="264" rx="10" ry="7" fill="#f9c4d2"/>
+
+    <!-- Fluffy tail (behind, peeking) -->
+    <circle cx="100" cy="265" r="12" fill="white" opacity="0.8"/>
+
+    <!-- Heart on belly -->
+    <path d="M94 215 C94 211 97 209 100 213 C103 209 106 211 106 215 C106 220 100 224 100 224 C100 224 94 220 94 215Z" fill="#f9c4d2" opacity="0.5"/>
+  </svg>`;
+}
+
+// ── Toothpaste SVG ──
+function toothpasteSVG() {
+  return `<svg viewBox="0 0 55 70" xmlns="http://www.w3.org/2000/svg">
+    <!-- Tube body -->
+    <rect x="10" y="22" width="35" height="42" rx="8" fill="#60a5fa"/>
+    <rect x="10" y="22" width="35" height="14" rx="6" fill="#93c5fd"/>
+    <!-- Cap -->
+    <rect x="17" y="8" width="21" height="16" rx="5" fill="#e5e7eb"/>
+    <rect x="20" y="2" width="15" height="10" rx="7" fill="#d1d5db"/>
+    <!-- Label -->
+    <rect x="14" y="38" width="27" height="16" rx="4" fill="rgba(255,255,255,0.3)"/>
+    <text x="27.5" y="49" text-anchor="middle" font-size="6" fill="white" font-weight="bold">PASTE</text>
+    <!-- Stripe -->
+    <rect x="10" y="56" width="35" height="4" rx="2" fill="#3b82f6"/>
+    <!-- Squeeze line detail -->
+    <path d="M16 60 Q27 65 39 60" fill="none" stroke="#2563eb" stroke-width="1" opacity="0.4"/>
+  </svg>`;
+}
+
+// ── Toothbrush SVG ──
+function toothbrushSVG(hasPaste) {
+  const pasteMarkup = hasPaste ? `
+    <!-- Paste blob on bristles -->
+    <ellipse cx="27" cy="8" rx="11" ry="5" fill="#93c5fd"/>
+    <ellipse cx="27" cy="6" rx="8" ry="3.5" fill="#bfdbfe"/>
+    <path d="M19 7 Q27 2 35 7" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"/>
+  ` : '';
+  return `<svg viewBox="0 0 55 85" xmlns="http://www.w3.org/2000/svg">
+    <!-- Bristles -->
+    <rect x="14" y="3" width="26" height="18" rx="5" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+    <!-- Bristle lines -->
+    <line x1="19" y1="6" x2="19" y2="18" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="24" y1="5" x2="24" y2="19" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="29" y1="5" x2="29" y2="19" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="34" y1="6" x2="34" y2="18" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round"/>
+    ${pasteMarkup}
+    <!-- Neck -->
+    <rect x="22" y="21" width="10" height="8" rx="2" fill="#a78bfa"/>
+    <!-- Handle -->
+    <rect x="19" y="29" width="16" height="50" rx="6" fill="#a78bfa"/>
+    <rect x="19" y="29" width="16" height="50" rx="6" fill="url(#brushHandleGrad)" opacity="0.3"/>
+    <!-- Handle stripe details -->
+    <rect x="22" y="42" width="10" height="3" rx="1.5" fill="#8b5cf6" opacity="0.5"/>
+    <rect x="22" y="50" width="10" height="3" rx="1.5" fill="#8b5cf6" opacity="0.5"/>
+    <rect x="22" y="58" width="10" height="3" rx="1.5" fill="#8b5cf6" opacity="0.5"/>
+    <!-- Handle bottom -->
+    <ellipse cx="27" cy="79" rx="8" ry="4" fill="#7c3aed" opacity="0.3"/>
+    <defs>
+      <linearGradient id="brushHandleGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="white"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </linearGradient>
+    </defs>
+  </svg>`;
+}
+
+// ── Get teeth color based on cleanliness ──
+function getTeethColor() {
+  const p = toothState.cleanProgress;
+  // Interpolate from dirty yellow (#c4a832) to sparkling white (#ffffff)
+  const r = Math.round(196 + (255 - 196) * p / 100);
+  const g = Math.round(168 + (255 - 168) * p / 100);
+  const b = Math.round(50 + (255 - 50) * p / 100);
+  return `rgb(${r},${g},${b})`;
+}
+
+// ── Sound effects for tooth brushing ──
+function playBrushSound() {
+  if (muted || !toneReady) return;
+  try {
+    const synth = new Tone.NoiseSynth({
+      noise: { type: 'pink' },
+      envelope: { attack: 0.02, decay: 0.1, sustain: 0.05, release: 0.05 }
+    }).connect(limiter);
+    synth.triggerAttackRelease('0.08');
+    setTimeout(() => synth.dispose(), 300);
+  } catch(e) {}
+}
+
+function playSparkleSound() {
+  if (muted || !toneReady) return;
+  try {
+    const synth = new Tone.Synth({
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.01, decay: 0.3, sustain: 0, release: 0.3 }
+    }).connect(reverb);
+    synth.triggerAttackRelease('C6', '0.2');
+    setTimeout(() => {
+      const s2 = new Tone.Synth({
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.01, decay: 0.3, sustain: 0, release: 0.3 }
+      }).connect(reverb);
+      s2.triggerAttackRelease('E6', '0.2');
+      setTimeout(() => s2.dispose(), 500);
+    }, 100);
+    setTimeout(() => synth.dispose(), 500);
+  } catch(e) {}
+}
+
+function playPasteSquirt() {
+  if (muted || !toneReady) return;
+  try {
+    const synth = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.01, decay: 0.2, sustain: 0.05, release: 0.15 }
+    }).connect(limiter);
+    synth.triggerAttackRelease('G5', '0.15');
+    setTimeout(() => synth.dispose(), 400);
+  } catch(e) {}
+}
+
+function playCelebrationSound() {
+  if (muted || !toneReady) return;
+  try {
+    const notes = ['C5','E5','G5','C6'];
+    notes.forEach((n, i) => {
+      setTimeout(() => {
+        const s = new Tone.Synth({
+          oscillator: { type: 'triangle' },
+          envelope: { attack: 0.01, decay: 0.4, sustain: 0.1, release: 0.3 }
+        }).connect(reverb);
+        s.triggerAttackRelease(n, '0.3');
+        setTimeout(() => s.dispose(), 600);
+      }, i * 120);
+    });
+  } catch(e) {}
+}
+
+// ── Spawn foam bubbles around mouth area ──
+function spawnToothFoam(x, y) {
+  const stage = document.getElementById('tooth-stage');
+  const stageRect = stage.getBoundingClientRect();
+  for (let i = 0; i < 3; i++) {
+    const foam = document.createElement('div');
+    foam.className = 'brush-foam';
+    const size = 5 + Math.random() * 10;
+    foam.style.width = size + 'px';
+    foam.style.height = size + 'px';
+    foam.style.left = (x - stageRect.left + (Math.random() - 0.5) * 30) + 'px';
+    foam.style.top = (y - stageRect.top + (Math.random() - 0.5) * 20) + 'px';
+    stage.appendChild(foam);
+    setTimeout(() => foam.remove(), 1200);
+  }
+}
+
+// ── Spawn sparkle at position ──
+function spawnToothSparkle(x, y) {
+  const stage = document.getElementById('tooth-stage');
+  const stageRect = stage.getBoundingClientRect();
+  const sparkles = ['✨','⭐','💫','🌟'];
+  const sp = document.createElement('div');
+  sp.className = 'tooth-sparkle';
+  sp.textContent = sparkles[Math.floor(Math.random() * sparkles.length)];
+  sp.style.left = (x - stageRect.left + (Math.random() - 0.5) * 40) + 'px';
+  sp.style.top = (y - stageRect.top + (Math.random() - 0.5) * 30) + 'px';
+  stage.appendChild(sp);
+  setTimeout(() => sp.remove(), 800);
+}
+
+// ── Update rabbit appearance ──
+function updateRabbit() {
+  const rabbitEl = document.getElementById('tooth-rabbit');
+  if (rabbitEl) {
+    rabbitEl.innerHTML = rabbitSVG(getTeethColor());
+  }
+}
+
+// ── Update progress bar ──
+function updateToothProgress() {
+  const fill = document.getElementById('tooth-progress-fill');
+  if (fill) fill.style.width = toothState.cleanProgress + '%';
+}
+
+// ── Tooth drag system (similar to bath but for tooth-stage) ──
+let activeToothDrag = null;
+function makeToothDraggable(el, opts = {}) {
+  let isDragging = false;
+  let offsetX, offsetY, origParent, origNextSibling;
+
+  function onDown(e) {
+    if (opts.canDrag && !opts.canDrag()) return;
+    e.preventDefault();
+    e.stopPropagation();
+    unlockAudio();
+    isDragging = true;
+    activeToothDrag = el;
+    activeDrag = el;
+    const rect = el.getBoundingClientRect();
+    const stage = document.getElementById('tooth-stage');
+    const stageRect = stage.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    origParent = el.parentNode;
+    origNextSibling = el.nextSibling;
+    el.classList.add('dragging');
+    el.style.position = 'absolute';
+    el.style.left = (rect.left - stageRect.left) + 'px';
+    el.style.top = (rect.top - stageRect.top) + 'px';
+    el.style.width = rect.width + 'px';
+    el.style.zIndex = '100';
+    if (origParent !== stage) stage.appendChild(el);
+    if (opts.onStart) opts.onStart(el, { x: e.clientX, y: e.clientY });
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
+  }
+
+  function onMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    const stage = document.getElementById('tooth-stage');
+    const stageRect = stage.getBoundingClientRect();
+    el.style.left = (e.clientX - offsetX - stageRect.left) + 'px';
+    el.style.top = (e.clientY - offsetY - stageRect.top) + 'px';
+    if (opts.onMove) opts.onMove(el, { x: e.clientX, y: e.clientY });
+  }
+
+  function onUp(e) {
+    if (!isDragging) return;
+    isDragging = false;
+    activeToothDrag = null;
+    activeDrag = null;
+    el.classList.remove('dragging');
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('pointercancel', onUp);
+    const pos = e.clientX ? { x: e.clientX, y: e.clientY } : { x: 0, y: 0 };
+    if (opts.onEnd) opts.onEnd(el, pos, origParent, origNextSibling);
+  }
+
+  el.addEventListener('pointerdown', onDown);
+  el.style.touchAction = 'none';
+}
+
+function toothReparentBack(el, origParent, origNextSibling) {
+  el.style.position = '';
+  el.style.left = '';
+  el.style.top = '';
+  el.style.width = '';
+  el.style.zIndex = '';
+  el.style.transition = '';
+  if (origParent) {
+    if (origNextSibling && origNextSibling.parentNode === origParent) {
+      origParent.insertBefore(el, origNextSibling);
+    } else {
+      origParent.appendChild(el);
+    }
+  }
+}
+
+// ── Check if point overlaps element ──
+function isOverElement(pos, targetId) {
+  const el = document.getElementById(targetId);
+  if (!el) return false;
+  const r = el.getBoundingClientRect();
+  return pos.x >= r.left && pos.x <= r.right && pos.y >= r.top && pos.y <= r.bottom;
+}
+
+// ── Check overlap with the rabbit's mouth area ──
+function isOverMouth(pos) {
+  const rabbit = document.getElementById('tooth-rabbit');
+  if (!rabbit) return false;
+  const r = rabbit.getBoundingClientRect();
+  // Mouth is roughly in the center, at about 50-60% height of the rabbit
+  const mouthCX = r.left + r.width * 0.5;
+  const mouthCY = r.top + r.height * 0.54;
+  const mouthW = r.width * 0.32;
+  const mouthH = r.height * 0.12;
+  return Math.abs(pos.x - mouthCX) < mouthW && Math.abs(pos.y - mouthCY) < mouthH;
+}
+
+// ── Reset game ──
+function resetToothGame() {
+  toothState.phase = 'paste';
+  toothState.pasteApplied = false;
+  toothState.cleanProgress = 0;
+  toothState.strokeCount = 0;
+  toothState.brushing = false;
+
+  // Reset visuals
+  updateRabbit();
+  updateToothProgress();
+
+  const hint = document.getElementById('tooth-hint');
+  hint.textContent = '👆 Drag toothpaste to the brush!';
+  hint.classList.remove('hidden');
+
+  const celeb = document.getElementById('tooth-celebrate');
+  celeb.classList.remove('show');
+
+  // Reset tools
+  const pasteTool = document.querySelector('.tooth-tool[data-tool="paste"]');
+  const brushTool = document.querySelector('.tooth-tool[data-tool="brush"]');
+  pasteTool.classList.remove('used');
+  brushTool.classList.remove('used');
+
+  // Re-render brush without paste
+  document.getElementById('brush-icon').innerHTML = toothbrushSVG(false);
+}
+
+// ── Init ──
+function initToothBrush() {
+  if (toothInitialized) return;
+  toothInitialized = true;
+
+  // Render rabbit
+  const rabbitEl = document.getElementById('tooth-rabbit');
+  rabbitEl.innerHTML = rabbitSVG(getTeethColor());
+
+  // Render tools
+  document.getElementById('paste-icon').innerHTML = toothpasteSVG();
+  document.getElementById('brush-icon').innerHTML = toothbrushSVG(false);
+
+  const pasteTool = document.querySelector('.tooth-tool[data-tool="paste"]');
+  const brushTool = document.querySelector('.tooth-tool[data-tool="brush"]');
+
+  // ── Phase 1: Drag toothpaste to brush ──
+  makeToothDraggable(pasteTool, {
+    canDrag: () => toothState.phase === 'paste',
+    onEnd: (el, pos, origParent, origNextSibling) => {
+      // Check if dropped on brush
+      const brushRect = brushTool.getBoundingClientRect();
+      const overBrush = pos.x >= brushRect.left && pos.x <= brushRect.right &&
+                        pos.y >= brushRect.top && pos.y <= brushRect.bottom;
+
+      if (overBrush && toothState.phase === 'paste') {
+        // Apply paste!
+        toothState.pasteApplied = true;
+        toothState.phase = 'brush';
+        playPasteSquirt();
+
+        // Update brush to show paste
+        document.getElementById('brush-icon').innerHTML = toothbrushSVG(true);
+
+        // Mark paste as used
+        pasteTool.classList.add('used');
+
+        // Update hint
+        const hint = document.getElementById('tooth-hint');
+        hint.textContent = '🪥 Now drag the brush to the teeth!';
+
+        spawnParticles(
+          brushRect.left + brushRect.width / 2,
+          brushRect.top + brushRect.height / 2,
+          8
+        );
+      }
+
+      // Return paste to shelf
+      toothReparentBack(el, origParent, origNextSibling);
+    }
+  });
+
+  // ── Phase 2: Drag brush to mouth for cleaning ──
+  let brushMoveCounter = 0;
+  makeToothDraggable(brushTool, {
+    canDrag: () => toothState.phase === 'brush',
+    onMove: (el, pos) => {
+      if (toothState.phase !== 'brush') return;
+      if (isOverMouth(pos)) {
+        brushMoveCounter++;
+        // Every few move events = one stroke
+        if (brushMoveCounter % 3 === 0) {
+          toothState.strokeCount++;
+          const progress = Math.min(100, (toothState.strokeCount / toothState.totalStrokes) * 100);
+          toothState.cleanProgress = progress;
+
+          updateRabbit();
+          updateToothProgress();
+          playBrushSound();
+          spawnToothFoam(pos.x, pos.y);
+
+          // Sparkle at higher cleanliness
+          if (progress > 40 && Math.random() > 0.5) {
+            spawnToothSparkle(pos.x, pos.y);
+          }
+
+          // Check completion
+          if (progress >= 100 && toothState.phase === 'brush') {
+            toothState.phase = 'done';
+            // Return brush and celebrate
+            setTimeout(() => {
+              celebrateTooth();
+            }, 300);
+          }
+        }
+      }
+    },
+    onEnd: (el, pos, origParent, origNextSibling) => {
+      brushMoveCounter = 0;
+      toothReparentBack(el, origParent, origNextSibling);
+    }
+  });
+
+  // ── Replay button ──
+  document.getElementById('tooth-replay-btn').addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    resetToothGame();
+  });
+}
+
+function celebrateTooth() {
+  const hint = document.getElementById('tooth-hint');
+  hint.classList.add('hidden');
+
+  playSparkleSound();
+  playCelebrationSound();
+
+  // Sparkle burst around rabbit
+  const rabbit = document.getElementById('tooth-rabbit');
+  const r = rabbit.getBoundingClientRect();
+  for (let i = 0; i < 15; i++) {
+    setTimeout(() => {
+      spawnToothSparkle(
+        r.left + Math.random() * r.width,
+        r.top + Math.random() * r.height
+      );
+      spawnParticles(
+        r.left + Math.random() * r.width,
+        r.top + Math.random() * r.height * 0.7,
+        3
+      );
+    }, i * 80);
+  }
+
+  // Show celebration after sparkles
+  setTimeout(() => {
+    const celeb = document.getElementById('tooth-celebrate');
+    celeb.classList.add('show');
+  }, 800);
 }
 
 // ─────────────────────────────────────────────
